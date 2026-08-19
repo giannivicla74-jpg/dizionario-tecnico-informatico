@@ -32,6 +32,7 @@
       --badge-new: rgba(34, 197, 94, 0.15);
       --badge-new-text: #4ade80;
       --danger: #f43f5e;
+      --star: #fbbf24;
       --code-bg: #060911;
       --glow: 0 0 25px rgba(56, 189, 248, 0.15);
     }
@@ -111,21 +112,30 @@
       background: rgba(244, 63, 94, 0.15); 
     }
 
-    /* Pannello Impostazioni */
+    /* Pannello Impostazioni Avanzate */
     .settings-panel {
       display: none; 
       background: var(--card-bg); 
       backdrop-filter: blur(16px);
       border: 1px solid var(--border);
-      border-radius: 14px; 
-      padding: 1.25rem; 
+      border-radius: 16px; 
+      padding: 1.5rem; 
       margin-bottom: 1.5rem;
-      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3);
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4);
       animation: fadeIn 0.3s ease;
     }
     .settings-panel.open { display: block; }
-    .settings-row { display: flex; gap: 0.6rem; align-items: center; margin-top: 0.6rem; }
-    .settings-row input {
+    .settings-section-title {
+      font-size: 0.95rem;
+      font-weight: 700;
+      color: var(--accent);
+      margin-bottom: 0.6rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .settings-row { display: flex; gap: 0.6rem; align-items: center; margin-bottom: 1.25rem; }
+    .settings-row input[type="password"] {
       flex: 1; 
       padding: 0.65rem 1rem; 
       border-radius: 8px; 
@@ -134,9 +144,73 @@
       color: var(--text); 
       outline: none; 
       font-size: 0.9rem;
-      transition: border-color 0.2s;
     }
     .settings-row input:focus { border-color: var(--accent); }
+
+    /* Modulo Configurazione Audio Vocale */
+    .voice-config-box {
+      background: rgba(15, 23, 42, 0.6);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 1.2rem;
+      margin-top: 0.8rem;
+    }
+    .voice-filter-group {
+      display: flex;
+      gap: 0.5rem;
+      margin-bottom: 1rem;
+    }
+    .btn-voice-filter {
+      flex: 1;
+      padding: 0.45rem 0.6rem;
+      border-radius: 8px;
+      border: 1px solid var(--border);
+      background: var(--card-bg);
+      color: var(--text-muted);
+      cursor: pointer;
+      font-size: 0.84rem;
+      font-weight: 600;
+      transition: all 0.2s;
+    }
+    .btn-voice-filter.active {
+      background: rgba(56, 189, 248, 0.2);
+      border-color: var(--accent);
+      color: var(--accent);
+    }
+    .voice-select {
+      width: 100%;
+      padding: 0.7rem 1rem;
+      border-radius: 8px;
+      border: 1px solid var(--border);
+      background: var(--code-bg);
+      color: var(--text);
+      font-size: 0.92rem;
+      outline: none;
+      margin-bottom: 1.2rem;
+      cursor: pointer;
+    }
+    .voice-select:focus { border-color: var(--accent); }
+    .sliders-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1.2rem;
+      margin-bottom: 0.5rem;
+    }
+    @media (max-width: 600px) { .sliders-grid { grid-template-columns: 1fr; } }
+    .slider-item { display: flex; flex-direction: column; gap: 0.4rem; }
+    .slider-item label {
+      display: flex;
+      justify-content: space-between;
+      font-size: 0.82rem;
+      color: var(--text-muted);
+      font-weight: 600;
+    }
+    .slider-item label span { color: var(--accent); }
+    .slider-item input[type="range"] {
+      width: 100%;
+      accent-color: var(--accent);
+      cursor: pointer;
+    }
 
     /* Barra Info Sincronizzazione */
     .tools-bar {
@@ -173,6 +247,8 @@
     }
     .btn-action.btn-import { background: rgba(20, 184, 166, 0.15); border-color: rgba(20, 184, 166, 0.4); color: #2dd4bf; }
     .btn-action.btn-import:hover { background: rgba(20, 184, 166, 0.25); }
+    .btn-action.btn-pdf { background: rgba(99, 102, 241, 0.15); border-color: rgba(99, 102, 241, 0.4); color: #a5b4fc; }
+    .btn-action.btn-pdf:hover { background: rgba(99, 102, 241, 0.25); }
 
     /* Ricerca */
     .search-box { display: flex; gap: 0.5rem; margin-bottom: 1.25rem; }
@@ -205,9 +281,7 @@
       -webkit-overflow-scrolling: touch;
       cursor: grab;
     }
-    .categories-bar::-webkit-scrollbar {
-      display: none;
-    }
+    .categories-bar::-webkit-scrollbar { display: none; }
 
     .cat-filter-btn {
       padding: 0.45rem 1.1rem; 
@@ -230,6 +304,10 @@
       border-color: transparent; 
       font-weight: 700;
       box-shadow: 0 0 15px rgba(56, 189, 248, 0.35);
+    }
+    .cat-filter-btn.favorites-btn.active {
+      background: linear-gradient(135deg, #f59e0b 0%, #ef4444 100%);
+      color: white;
     }
 
     /* Switch Sintesi / Dettaglio */
@@ -302,7 +380,7 @@
     .card-header {
       display: flex; 
       justify-content: space-between; 
-      align-items: flex-start; 
+      align-items: center; 
       margin-bottom: 0.75rem;
     }
     .term-card h2 { 
@@ -310,6 +388,38 @@
       font-weight: 700;
       color: #ffffff;
       letter-spacing: -0.3px;
+    }
+
+    .card-header-actions {
+      display: flex;
+      align-items: center;
+      gap: 0.4rem;
+    }
+    .btn-card-tool {
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid var(--border);
+      color: var(--text-muted);
+      cursor: pointer;
+      font-size: 0.95rem;
+      padding: 0.35rem 0.55rem;
+      border-radius: 8px;
+      transition: all 0.2s;
+    }
+    .btn-card-tool:hover {
+      color: var(--accent);
+      border-color: var(--accent);
+      background: rgba(56, 189, 248, 0.1);
+    }
+    .btn-card-tool.starred {
+      color: var(--star);
+      border-color: var(--star);
+      background: rgba(251, 191, 36, 0.15);
+    }
+    .btn-card-tool.speaking {
+      color: #ef4444 !important;
+      border-color: #ef4444 !important;
+      background: rgba(239, 68, 68, 0.15) !important;
+      animation: pulse 1.2s infinite;
     }
 
     /* Pulsante Cestino Protetto */
@@ -357,7 +467,7 @@
       font-size: 0.96rem;
     }
 
-    /* Box: Scenario Applicativo Reale */
+    /* Scenario Reale */
     .usecase-box {
       margin-top: 1.25rem;
       background: rgba(15, 23, 42, 0.65);
@@ -383,7 +493,7 @@
       line-height: 1.6;
     }
 
-    /* Blocco: Quando Usarlo vs Quando Evitarlo */
+    /* Quando Usarlo vs Quando Evitarlo */
     .pros-cons-grid {
       display: grid;
       grid-template-columns: 1fr 1fr;
@@ -533,6 +643,21 @@
     .footer-version { color: var(--accent); font-weight: 600; margin-left: 0.35rem; }
 
     @keyframes fadeIn { from { opacity: 0; transform: translateY(-5px); } to { opacity: 1; transform: translateY(0); } }
+    @keyframes pulse { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.15); } }
+
+    /* Stampa / PDF */
+    @media print {
+      body { background: white !important; color: black !important; padding: 0; }
+      .header-actions, .tools-bar, .search-box, .categories-bar, .view-toggle, .btn-card-tool, .btn-copy, .btn-delete, footer { display: none !important; }
+      .term-card { background: white !important; border: 1px solid #ccc !important; box-shadow: none !important; break-inside: avoid; margin-bottom: 2rem; }
+      .term-card h2 { color: #0284c7 !important; }
+      .usecase-box { background: #f8fafc !important; border-left: 3px solid #0284c7 !important; color: #0f172a !important; }
+      .usecase-text { color: #0f172a !important; }
+      .code-block { background: #f1f5f9 !important; border: 1px solid #e2e8f0 !important; }
+      pre code { color: #0f172a !important; }
+      .pill-card.when-to-use { background: #f0fdf4 !important; color: #166534 !important; border: 1px solid #bbf7d0 !important; }
+      .pill-card.when-to-avoid { background: #fff1f2 !important; color: #9f1239 !important; border: 1px solid #fecdd3 !important; }
+    }
   </style>
 </head>
 <body>
@@ -542,26 +667,60 @@
     <div class="header-titles">
       <div class="title-row">
         <h1>DevLexicon</h1>
-        <span class="version-pill">v2.0.0</span>
+        <span class="version-pill">v2.1.0</span>
       </div>
       <p>Enciclopedia Tecnica Cloud &amp; Auto-Apprendimento AI</p>
     </div>
     <div class="header-actions">
       <button class="btn-icon" id="btnLock" title="Sblocca/Blocca eliminazione schede" onclick="toggleEditMode()">🔒</button>
-      <button class="btn-icon" title="Gestione Chiave Gemini" onclick="toggleSettings()">⚙️</button>
+      <button class="btn-icon" title="Configura Chiave &amp; Voce" onclick="toggleSettings()">⚙️</button>
     </div>
   </div>
 
-  <!-- Pannello Impostazioni -->
+  <!-- Pannello Impostazioni Avanzate -->
   <div class="settings-panel" id="settingsPanel">
-    <label style="font-size: 0.85rem; color: var(--text-muted);">Chiave Gemini Cloud (Sincronizzata su tutti i dispositivi):</label>
+    
+    <!-- Chiave Gemini -->
+    <div class="settings-section-title">
+      <span>🔑 Chiave API Gemini Cloud</span>
+    </div>
     <div class="settings-row">
       <input type="password" id="apiKeyInput" placeholder="Inserisci chiave Gemini...">
-      <button class="btn-action" onclick="saveCloudApiKey()">Salva su Cloud</button>
+      <button class="btn-action" onclick="saveCloudApiKey()">Salva Chiave</button>
     </div>
+
+    <!-- Modulo Configurazione Audio Vocale Setup -->
+    <div class="settings-section-title">
+      <span>🔊 Configurazione Sintesi Vocale</span>
+      <button class="btn-action" id="btnTestAudio" style="font-size: 0.78rem; padding: 0.3rem 0.6rem;" onclick="testVoiceAudio(this)">▶ Prova Audio</button>
+    </div>
+
+    <div class="voice-config-box">
+      <label style="font-size: 0.8rem; color: var(--text-muted); font-weight: 600; display: block; margin-bottom: 0.4rem;">Filtro Genere Voci:</label>
+      <div class="voice-filter-group">
+        <button class="btn-voice-filter active" id="btnFilterFem" onclick="setVoiceGenderFilter('female')">👩 Femminile</button>
+        <button class="btn-voice-filter" id="btnFilterMasc" onclick="setVoiceGenderFilter('male')">👨 Maschile</button>
+        <button class="btn-voice-filter" id="btnFilterAll" onclick="setVoiceGenderFilter('all')">🌐 Tutte</button>
+      </div>
+
+      <label style="font-size: 0.8rem; color: var(--text-muted); font-weight: 600; display: block; margin-bottom: 0.4rem;">Voce Selezionata:</label>
+      <select id="voiceSelect" class="voice-select" onchange="onVoiceParamsChanged(true)"></select>
+
+      <div class="sliders-grid">
+        <div class="slider-item">
+          <label>Velocità Voce: <span id="rateVal">0.90x</span></label>
+          <input type="range" id="rateRange" min="0.5" max="1.5" step="0.05" value="0.90" oninput="onVoiceParamsChanged(false)">
+        </div>
+        <div class="slider-item">
+          <label>Tonalità (Pitch): <span id="pitchVal">1.00</span></label>
+          <input type="range" id="pitchRange" min="0.5" max="1.5" step="0.05" value="1.00" oninput="onVoiceParamsChanged(false)">
+        </div>
+      </div>
+    </div>
+
   </div>
 
-  <!-- Barra Info, Import & Backup -->
+  <!-- Barra Info, Import, PDF & Backup -->
   <div class="tools-bar">
     <div>
       <span id="termCount">Caricamento in corso...</span>
@@ -570,13 +729,14 @@
     <div class="tools-buttons">
       <button class="btn-action btn-import" onclick="document.getElementById('importFile').click()">📂 Importa JSON</button>
       <input type="file" id="importFile" accept=".json" style="display: none;" onchange="importDataToCloud(event)">
+      <button class="btn-action btn-pdf" onclick="window.print()" title="Stampa o salva come PDF">📄 Stampa / PDF</button>
       <button class="btn-action" onclick="exportData()">💾 Backup Locale</button>
     </div>
   </div>
 
   <!-- Ricerca -->
   <div class="search-box">
-    <input type="text" id="searchInput" placeholder="Cerca tra oltre 100 concetti (es. Docker, Sharding, CORS, RAG, Event Loop)...">
+    <input type="text" id="searchInput" placeholder="Cerca tra concetti (es. Docker, Sharding, CORS, RAG, Event Loop)...">
   </div>
 
   <!-- Categorie Dinamiche -->
@@ -601,7 +761,7 @@
     Software Engineered &amp; Designed by: <span class="brand-highlight">GC CodeLab</span> • <span class="brand-author">Giovanni Cavallo</span>
   </div>
   <div class="brand-rights">
-    © <span id="currentYear"></span> DevLexicon • Tutti i diritti riservati • <span class="footer-version">v2.0.0 Pro</span>
+    © <span id="currentYear"></span> DevLexicon • Tutti i diritti riservati • <span class="footer-version">v2.1.0 Interactive Pro</span>
   </div>
 </footer>
 
@@ -628,22 +788,153 @@
   const db = firebase.database();
 
   let glossary = [];
+  let favorites = JSON.parse(localStorage.getItem('devlex_favorites') || '[]');
   let activeGeminiKey = '';
   let currentMode = 'summary';
   let selectedCategory = 'ALL';
   let isEditMode = false;
   let retryCountdownTimer = null;
 
+  // --- MOTORE VOCALE OTTIMIZZATO ---
+  let allSystemVoices = [];
+  let currentVoiceGenderFilter = localStorage.getItem('devlex_voice_filter') || 'female';
+  let currentlyPlayingBtn = null;
+  let lastSpokenText = '';
+  let sliderDebounceTimer = null;
+
+  const testAudioPhrase = "Questa è la voce configurata per la tua enciclopedia tecnica DevLexicon.";
+
+  function populateVoiceList() {
+    if (!('speechSynthesis' in window)) return;
+    allSystemVoices = window.speechSynthesis.getVoices() || [];
+
+    const voiceSelect = document.getElementById('voiceSelect');
+    if (!voiceSelect) return;
+    
+    const previousSelection = voiceSelect.value || localStorage.getItem('devlex_selected_voice');
+    voiceSelect.innerHTML = '';
+
+    if (allSystemVoices.length === 0) return;
+
+    let itVoices = allSystemVoices.filter(v => v.lang && (v.lang.startsWith('it') || v.lang.startsWith('IT')));
+    if (itVoices.length === 0) itVoices = allSystemVoices;
+
+    let filteredVoices = itVoices.filter(v => {
+      const nameLower = (v.name || '').toLowerCase();
+      const isMale = nameLower.includes('cosimo') || nameLower.includes('maschile') || nameLower.includes('male') || nameLower.includes('diego') || nameLower.includes('giorgio');
+      const isFemale = !isMale;
+
+      if (currentVoiceGenderFilter === 'female') return isFemale;
+      if (currentVoiceGenderFilter === 'male') return isMale;
+      return true;
+    });
+
+    if (filteredVoices.length === 0) filteredVoices = itVoices;
+
+    filteredVoices.forEach(voice => {
+      const option = document.createElement('option');
+      option.value = voice.name;
+      const nameLower = (voice.name || '').toLowerCase();
+      const isMale = nameLower.includes('cosimo') || nameLower.includes('maschile') || nameLower.includes('male') || nameLower.includes('diego');
+      option.textContent = `${voice.name} (${isMale ? '👨 Maschile' : '👩 Femminile'})`;
+      voiceSelect.appendChild(option);
+    });
+
+    if (previousSelection && Array.from(voiceSelect.options).some(o => o.value === previousSelection)) {
+      voiceSelect.value = previousSelection;
+    } else if (voiceSelect.options.length > 0) {
+      const natural = Array.from(voiceSelect.options).find(o => o.value.includes('Google') || o.value.includes('Natural') || o.value.includes('Elsa') || o.value.includes('Isabella'));
+      voiceSelect.value = natural ? natural.value : voiceSelect.options[0].value;
+      localStorage.setItem('devlex_selected_voice', voiceSelect.value);
+    }
+
+    const savedRate = localStorage.getItem('devlex_voice_rate') || '0.90';
+    const savedPitch = localStorage.getItem('devlex_voice_pitch') || '1.00';
+    const rateEl = document.getElementById('rateRange');
+    const pitchEl = document.getElementById('pitchRange');
+    if (rateEl) rateEl.value = savedRate;
+    if (pitchEl) pitchEl.value = savedPitch;
+    updateSlidersLive();
+  }
+
+  function setVoiceGenderFilter(gender) {
+    currentVoiceGenderFilter = gender;
+    localStorage.setItem('devlex_voice_filter', gender);
+    const bF = document.getElementById('btnFilterFem');
+    const bM = document.getElementById('btnFilterMasc');
+    const bA = document.getElementById('btnFilterAll');
+    if (bF) bF.classList.toggle('active', gender === 'female');
+    if (bM) bM.classList.toggle('active', gender === 'male');
+    if (bA) bA.classList.toggle('active', gender === 'all');
+    populateVoiceList();
+    onVoiceParamsChanged(true);
+  }
+
+  function updateSlidersLive() {
+    const rateEl = document.getElementById('rateRange');
+    const pitchEl = document.getElementById('pitchRange');
+    const rateValEl = document.getElementById('rateVal');
+    const pitchValEl = document.getElementById('pitchVal');
+
+    if (rateEl && rateValEl) rateValEl.textContent = `${parseFloat(rateEl.value).toFixed(2)}x`;
+    if (pitchEl && pitchValEl) pitchValEl.textContent = parseFloat(pitchEl.value).toFixed(2);
+  }
+
+  function saveVoicePreference() {
+    const voiceSelect = document.getElementById('voiceSelect');
+    const rateEl = document.getElementById('rateRange');
+    const pitchEl = document.getElementById('pitchRange');
+
+    if (voiceSelect && voiceSelect.value) {
+      localStorage.setItem('devlex_selected_voice', voiceSelect.value);
+    }
+    if (rateEl) localStorage.setItem('devlex_voice_rate', rateEl.value);
+    if (pitchEl) localStorage.setItem('devlex_voice_pitch', pitchEl.value);
+  }
+
+  function onVoiceParamsChanged(immediate = false) {
+    updateSlidersLive();
+    saveVoicePreference();
+
+    if (!('speechSynthesis' in window) || !window.speechSynthesis.speaking || !currentlyPlayingBtn) return;
+
+    if (sliderDebounceTimer) clearTimeout(sliderDebounceTimer);
+
+    if (immediate) {
+      const activeBtn = currentlyPlayingBtn;
+      const textToReplay = lastSpokenText || testAudioPhrase;
+      speakTerm(activeBtn, textToReplay);
+    } else {
+      sliderDebounceTimer = setTimeout(() => {
+        if (currentlyPlayingBtn) {
+          const activeBtn = currentlyPlayingBtn;
+          const textToReplay = lastSpokenText || testAudioPhrase;
+          speakTerm(activeBtn, textToReplay);
+        }
+      }, 250);
+    }
+  }
+
+  function testVoiceAudio(btn) {
+    speakTerm(btn, testAudioPhrase);
+  }
+
+  if ('speechSynthesis' in window) {
+    window.speechSynthesis.onvoiceschanged = populateVoiceList;
+    setTimeout(populateVoiceList, 250);
+  }
+
   // Scroll orizzontale categorie con rotellina mouse
   const categoriesBarElement = document.getElementById('categoriesBar');
-  categoriesBarElement.addEventListener('wheel', (e) => {
-    if (e.deltaY !== 0) {
-      e.preventDefault();
-      categoriesBarElement.scrollLeft += e.deltaY;
-    }
-  }, { passive: false });
+  if (categoriesBarElement) {
+    categoriesBarElement.addEventListener('wheel', (e) => {
+      if (e.deltaY !== 0) {
+        e.preventDefault();
+        categoriesBarElement.scrollLeft += e.deltaY;
+      }
+    }, { passive: false });
+  }
 
-  // Algoritmo di Levenshtein per Fuzzy Match
   function getLevenshteinDistance(a, b) {
     const matrix = Array.from({ length: a.length + 1 }, () => Array(b.length + 1).fill(0));
     for (let i = 0; i <= a.length; i++) matrix[i][0] = i;
@@ -697,7 +988,93 @@
   }
 
   function toggleSettings() {
-    document.getElementById('settingsPanel').classList.toggle('open');
+    const panel = document.getElementById('settingsPanel');
+    if (!panel) return;
+    panel.classList.toggle('open');
+    if (panel.classList.contains('open')) {
+      populateVoiceList();
+    }
+  }
+
+  function toggleFavorite(termId) {
+    if (favorites.includes(termId)) {
+      favorites = favorites.filter(id => id !== termId);
+    } else {
+      favorites.push(termId);
+    }
+    localStorage.setItem('devlex_favorites', JSON.stringify(favorites));
+    renderCategories();
+    renderTerms(document.getElementById('searchInput').value);
+  }
+
+  function speakTerm(btn, textToSpeak) {
+    if (!('speechSynthesis' in window)) {
+      alert('La sintesi vocale non è supportata dal tuo browser.');
+      return;
+    }
+
+    if (window.speechSynthesis.speaking && currentlyPlayingBtn === btn) {
+      window.speechSynthesis.cancel();
+      if (btn) {
+        btn.classList.remove('speaking');
+        btn.title = "Ascolta spiegazione vocale";
+      }
+      currentlyPlayingBtn = null;
+      lastSpokenText = '';
+      return;
+    }
+
+    window.speechSynthesis.cancel();
+    document.querySelectorAll('.btn-card-tool.speaking, #btnTestAudio.speaking').forEach(b => {
+      b.classList.remove('speaking');
+      b.title = "Ascolta spiegazione vocale";
+    });
+
+    let cleanText = textToSpeak
+      .replace(/[(){}\[\]_`*#]/g, ' ')
+      .replace(/\s+/g, ' ')
+      .trim();
+
+    lastSpokenText = cleanText;
+
+    const utterance = new SpeechSynthesisUtterance(cleanText);
+    utterance.lang = 'it-IT';
+
+    const currentRate = parseFloat(localStorage.getItem('devlex_voice_rate') || '0.90');
+    const currentPitch = parseFloat(localStorage.getItem('devlex_voice_pitch') || '1.00');
+    utterance.rate = currentRate;
+    utterance.pitch = currentPitch;
+
+    if (allSystemVoices.length === 0) {
+      allSystemVoices = window.speechSynthesis.getVoices() || [];
+    }
+    const targetVoiceName = localStorage.getItem('devlex_selected_voice') || (document.getElementById('voiceSelect') ? document.getElementById('voiceSelect').value : '');
+    if (targetVoiceName && allSystemVoices.length > 0) {
+      const match = allSystemVoices.find(v => v.name === targetVoiceName);
+      if (match) utterance.voice = match;
+    }
+
+    if (btn) {
+      currentlyPlayingBtn = btn;
+      utterance.onstart = () => {
+        btn.classList.add('speaking');
+        btn.title = "Clicca per interrompere l'audio";
+      };
+      utterance.onend = () => {
+        btn.classList.remove('speaking');
+        btn.title = "Ascolta spiegazione vocale";
+        currentlyPlayingBtn = null;
+        lastSpokenText = '';
+      };
+      utterance.onerror = () => {
+        btn.classList.remove('speaking');
+        btn.title = "Ascolta spiegazione vocale";
+        currentlyPlayingBtn = null;
+        lastSpokenText = '';
+      };
+    }
+
+    window.speechSynthesis.speak(utterance);
   }
 
   db.ref('settings/gemini_api_key').on('value', (snapshot) => {
@@ -774,14 +1151,23 @@
   }
 
   function renderCategories() {
-    const categories = ['ALL', ...new Set(glossary.map(item => item.category || 'Generale'))];
+    const categories = ['ALL', 'FAVORITES', ...new Set(glossary.map(item => item.category || 'Generale'))];
     
-    categoriesBarElement.innerHTML = categories.map(cat => `
-      <button class="cat-filter-btn ${selectedCategory === cat ? 'active' : ''}" 
-              onclick="setCategory('${escapeHtml(cat)}')">
-        ${cat === 'ALL' ? 'Tutte le Categorie' : escapeHtml(cat)}
-      </button>
-    `).join('');
+    categoriesBarElement.innerHTML = categories.map(cat => {
+      let label = cat;
+      let extraClass = '';
+      if (cat === 'ALL') label = 'Tutte le Categorie';
+      if (cat === 'FAVORITES') {
+        label = `⭐ Preferiti (${favorites.length})`;
+        extraClass = 'favorites-btn';
+      }
+      return `
+        <button class="cat-filter-btn ${extraClass} ${selectedCategory === cat ? 'active' : ''}" 
+                onclick="setCategory('${escapeHtml(cat)}')">
+          ${escapeHtml(label)}
+        </button>
+      `;
+    }).join('');
   }
 
   function deleteTerm(fbKey, termName) {
@@ -814,16 +1200,19 @@
     a.remove();
   }
 
-  // Motore di Ricerca con Ranking
   function renderTerms(query = '') {
     const listContainer = document.getElementById('termsList');
     const didYouMeanContainer = document.getElementById('didYouMeanContainer');
-    const cleanQuery = query.trim().toLowerCase();
+    const cleanQuery = (query || '').trim().toLowerCase();
     
     document.getElementById('termCount').innerText = `${glossary.length} concetti memorizzati`;
     didYouMeanContainer.innerHTML = '';
 
-    let categoryPool = glossary.filter(item => selectedCategory === 'ALL' || item.category === selectedCategory);
+    let categoryPool = glossary.filter(item => {
+      if (selectedCategory === 'FAVORITES') return favorites.includes(item._fbKey);
+      if (selectedCategory === 'ALL') return true;
+      return item.category === selectedCategory;
+    });
 
     if (cleanQuery.length === 0) {
       renderCards(categoryPool);
@@ -834,7 +1223,7 @@
     let fuzzyMatches = [];
 
     categoryPool.forEach(item => {
-      const termTitle = item.term.toLowerCase();
+      const termTitle = (item.term || '').toLowerCase();
       const termCategory = (item.category || '').toLowerCase();
       const termSummary = (item.summary || '').toLowerCase();
       const termDetail = (item.detail || '').toLowerCase();
@@ -852,7 +1241,7 @@
       } else if (termDetail.includes(cleanQuery)) {
         exactMatches.push({ item, score: 10 });
       } else {
-        const sim = fuzzySimilarity(cleanQuery, item.term);
+        const sim = fuzzySimilarity(cleanQuery, item.term || '');
         if (sim >= 0.58) {
           fuzzyMatches.push({ item, score: sim * 100 });
         }
@@ -890,66 +1279,86 @@
     `;
   }
 
-  // Renderizzazione Card
   function renderCards(items) {
     const listContainer = document.getElementById('termsList');
-    listContainer.innerHTML = items.map(item => `
-      <div class="term-card">
-        <div class="card-header">
-          <h2>${escapeHtml(item.term)}</h2>
-          <button class="btn-delete" onclick="deleteTerm('${item._fbKey}', '${escapeHtml(item.term)}')">
-            🗑️ Elimina
-          </button>
+    if (items.length === 0 && selectedCategory === 'FAVORITES') {
+      listContainer.innerHTML = `
+        <div class="not-found-box">
+          <p>Nessun termine aggiunto ai preferiti. Clicca sulla stellina (⭐) di qualsiasi scheda per salvarla qui!</p>
         </div>
-        <div class="badge-group">
-          <span class="category-badge">${escapeHtml(item.category || 'Generale')}</span>
-          ${item.autoFetched ? '<span class="new-badge">Generato con AI</span>' : ''}
-        </div>
-        
-        <p class="text-content">
-          ${escapeHtml(currentMode === 'summary' ? item.summary : item.detail)}
-        </p>
+      `;
+      return;
+    }
 
-        ${currentMode === 'detail' ? `
-          ${item.useCase ? `
-            <div class="usecase-box">
-              <div class="usecase-header">🚀 Scenario Applicativo nel Mondo Reale</div>
-              <div class="usecase-text">${escapeHtml(item.useCase)}</div>
+    listContainer.innerHTML = items.map(item => {
+      const isFav = favorites.includes(item._fbKey);
+      const speechText = `${item.term}. ${item.summary}. ${item.useCase || ''}`;
+
+      return `
+        <div class="term-card">
+          <div class="card-header">
+            <h2>${escapeHtml(item.term)}</h2>
+            <div class="card-header-actions">
+              <button class="btn-card-tool ${isFav ? 'starred' : ''}" title="${isFav ? 'Rimuovi dai Preferiti' : 'Aggiungi ai Preferiti'}" onclick="toggleFavorite('${item._fbKey}')">
+                ⭐
+              </button>
+              <button class="btn-card-tool" title="Ascolta spiegazione vocale" onclick="speakTerm(this, '${escapeHtml(speechText).replace(/'/g, "\\'")}')">
+                🔊
+              </button>
+              <button class="btn-delete" onclick="deleteTerm('${item._fbKey}', '${escapeHtml(item.term)}')">
+                🗑️ Elimina
+              </button>
             </div>
-          ` : ''}
+          </div>
+          <div class="badge-group">
+            <span class="category-badge">${escapeHtml(item.category || 'Generale')}</span>
+            ${item.autoFetched ? '<span class="new-badge">Generato con AI</span>' : ''}
+          </div>
+          
+          <p class="text-content">
+            ${escapeHtml(currentMode === 'summary' ? item.summary : item.detail)}
+          </p>
 
-          ${(item.whenToUse || item.whenToAvoid) ? `
-            <div class="pros-cons-grid">
-              ${item.whenToUse ? `
-                <div class="pill-card when-to-use">
-                  <div class="pill-card-title">✅ Quando Usarlo</div>
-                  <div>${escapeHtml(item.whenToUse)}</div>
-                </div>
-              ` : ''}
-              ${item.whenToAvoid ? `
-                <div class="pill-card when-to-avoid">
-                  <div class="pill-card-title">⚠️ Quando Evitarlo</div>
-                  <div>${escapeHtml(item.whenToAvoid)}</div>
-                </div>
-              ` : ''}
-            </div>
-          ` : ''}
-
-          ${item.code ? `
-            <div class="code-block">
-              <div class="code-header">
-                <span>💻 Snippet / Architettura Pratica</span>
-                <button class="btn-copy" onclick="copyCode(this, '${encodeURIComponent(item.code)}')">Copia Codice</button>
+          ${currentMode === 'detail' ? `
+            ${item.useCase ? `
+              <div class="usecase-box">
+                <div class="usecase-header">🚀 Scenario Applicativo nel Mondo Reale</div>
+                <div class="usecase-text">${escapeHtml(item.useCase)}</div>
               </div>
-              <pre><code>${escapeHtml(item.code)}</code></pre>
-            </div>
+            ` : ''}
+
+            ${(item.whenToUse || item.whenToAvoid) ? `
+              <div class="pros-cons-grid">
+                ${item.whenToUse ? `
+                  <div class="pill-card when-to-use">
+                    <div class="pill-card-title">✅ Quando Usarlo</div>
+                    <div>${escapeHtml(item.whenToUse)}</div>
+                  </div>
+                ` : ''}
+                ${item.whenToAvoid ? `
+                  <div class="pill-card when-to-avoid">
+                    <div class="pill-card-title">⚠️ Quando Evitarlo</div>
+                    <div>${escapeHtml(item.whenToAvoid)}</div>
+                  </div>
+                ` : ''}
+              </div>
+            ` : ''}
+
+            ${item.code ? `
+              <div class="code-block">
+                <div class="code-header">
+                  <span>💻 Snippet / Architettura Pratica</span>
+                  <button class="btn-copy" onclick="copyCode(this, '${encodeURIComponent(item.code)}')">Copia Codice</button>
+                </div>
+                <pre><code>${escapeHtml(item.code)}</code></pre>
+              </div>
+            ` : ''}
           ` : ''}
-        ` : ''}
-      </div>
-    `).join('');
+        </div>
+      `;
+    }).join('');
   }
 
-  // Chiamata AI con Modello gemini-3.6-flash
   async function fetchTermFromWeb(searchTerm) {
     const apiKey = activeGeminiKey || localStorage.getItem('gemini_api_key');
     const loader = document.getElementById('fetchLoader');
