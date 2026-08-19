@@ -42,12 +42,15 @@
     .header-box { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem; }
     .header-titles h1 { font-size: 2.2rem; color: var(--accent); margin-bottom: 0.2rem; }
     .header-titles p { color: var(--text-muted); font-size: 0.95rem; }
-    .btn-settings {
+    .header-actions { display: flex; gap: 0.5rem; }
+
+    .btn-icon {
       background: var(--card-bg); border: 1px solid var(--border); color: var(--text);
-      font-size: 1.2rem; padding: 0.5rem 0.7rem; border-radius: 8px; cursor: pointer;
-      transition: background 0.2s;
+      font-size: 1.1rem; padding: 0.5rem 0.7rem; border-radius: 8px; cursor: pointer;
+      transition: all 0.2s;
     }
-    .btn-settings:hover { background: #334155; }
+    .btn-icon:hover { background: #334155; }
+    .btn-icon.unlocked { border-color: var(--danger); color: var(--danger); background: rgba(239, 68, 68, 0.1); }
 
     /* Pannello Impostazioni */
     .settings-panel {
@@ -121,11 +124,16 @@
       display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 0.5rem;
     }
     .term-card h2 { color: var(--accent); font-size: 1.3rem; }
+
+    /* Pulsante Cestino Protetto (Nascosto di Default) */
     .btn-delete {
-      background: transparent; border: none; color: var(--text-muted); cursor: pointer;
-      font-size: 1rem; padding: 0.2rem 0.5rem; border-radius: 4px;
+      display: none;
+      background: rgba(239, 68, 68, 0.15); border: 1px solid var(--danger); color: var(--danger);
+      cursor: pointer; font-size: 0.85rem; padding: 0.3rem 0.6rem; border-radius: 6px;
+      font-weight: 600; transition: all 0.2s;
     }
-    .btn-delete:hover { color: var(--danger); background: rgba(239, 68, 68, 0.1); }
+    .btn-delete:hover { background: var(--danger); color: white; }
+    body.edit-mode .btn-delete { display: inline-flex; align-items: center; gap: 0.3rem; }
 
     .badge-group { display: flex; gap: 0.5rem; margin-bottom: 0.8rem; }
     .category-badge {
@@ -159,33 +167,15 @@
     .btn-search-web:hover { background: var(--accent-hover); }
     .spinner { display: inline-block; margin-top: 1rem; color: var(--accent); font-weight: 600; }
 
-    /* Footer Marchio Personale */
+    /* Footer */
     footer {
-      margin-top: 3rem;
-      padding: 1.5rem 0 1rem 0;
-      text-align: center;
-      border-top: 1px solid rgba(51, 65, 85, 0.6);
-      width: 100%;
-      max-width: 900px;
+      margin-top: 3rem; padding: 1.5rem 0 1rem 0; text-align: center;
+      border-top: 1px solid rgba(51, 65, 85, 0.6); width: 100%; max-width: 900px;
     }
-    .brand-attribution {
-      font-size: 0.88rem;
-      color: var(--text-muted);
-      letter-spacing: 0.5px;
-      margin-bottom: 0.35rem;
-    }
-    .brand-highlight {
-      color: var(--accent);
-      font-weight: 700;
-    }
-    .brand-author {
-      color: #e2e8f0;
-      font-weight: 600;
-    }
-    .brand-rights {
-      font-size: 0.75rem;
-      color: #64748b;
-    }
+    .brand-attribution { font-size: 0.88rem; color: var(--text-muted); letter-spacing: 0.5px; margin-bottom: 0.35rem; }
+    .brand-highlight { color: var(--accent); font-weight: 700; }
+    .brand-author { color: #e2e8f0; font-weight: 600; }
+    .brand-rights { font-size: 0.75rem; color: #64748b; }
   </style>
 </head>
 <body>
@@ -196,7 +186,10 @@
       <h1>DevLexicon</h1>
       <p>Enciclopedia Tecnica Cloud con Sincronizzazione e Auto-Apprendimento AI</p>
     </div>
-    <button class="btn-settings" title="Gestione Chiave Gemini" onclick="toggleSettings()">⚙️</button>
+    <div class="header-actions">
+      <button class="btn-icon" id="btnLock" title="Sblocca/Blocca eliminazione schede" onclick="toggleEditMode()">🔒</button>
+      <button class="btn-icon" title="Gestione Chiave Gemini" onclick="toggleSettings()">⚙️</button>
+    </div>
   </div>
 
   <!-- Pannello Impostazioni -->
@@ -208,7 +201,7 @@
     </div>
   </div>
 
-  <!-- Barra Info, Inizializzazione, Import & Backup -->
+  <!-- Barra Info, Import & Backup -->
   <div class="tools-bar">
     <div>
       <span id="termCount">Caricamento dal cloud...</span>
@@ -217,7 +210,6 @@
     <div class="tools-buttons">
       <button class="btn-action btn-import" onclick="document.getElementById('importFile').click()">📂 Importa JSON</button>
       <input type="file" id="importFile" accept=".json" style="display: none;" onchange="importDataToCloud(event)">
-      <button class="btn-action btn-seed" onclick="seedDefaultTerms()">📥 Carica Base (+60)</button>
       <button class="btn-action" onclick="exportData()">💾 Backup Locale</button>
     </div>
   </div>
@@ -240,7 +232,7 @@
   <div id="termsList"></div>
 </div>
 
-<!-- Footer con Attribuzione -->
+<!-- Footer -->
 <footer>
   <div class="brand-attribution">
     Software Engineered &amp; Designed by: <span class="brand-highlight">GC CodeLab</span> • <span class="brand-author">Giovanni Cavallo</span>
@@ -272,21 +264,27 @@
   firebase.initializeApp(firebaseConfig);
   const db = firebase.database();
 
-  const initialTermsPack = [
-    {
-      term: "Architettura a Microservizi",
-      category: "Architettura",
-      summary: "Approccio in cui un'applicazione è disaccoppiata in una suite di servizi indipendenti, autonomi e comunicanti via rete.",
-      detail: "Ogni microservizio possiede un proprio database dedicato e favorisce il deploy indipendente.",
-      code: `[Client Web/Mobile] ──> [API Gateway] ──> [Auth / Fleet / Billing Services]`,
-      autoFetched: false
-    }
-  ];
-
   let glossary = [];
   let activeGeminiKey = '';
   let currentMode = 'summary';
   let selectedCategory = 'ALL';
+  let isEditMode = false;
+
+  // Attivazione/Disattivazione Sicura Modalità Eliminazione
+  function toggleEditMode() {
+    isEditMode = !isEditMode;
+    document.body.classList.toggle('edit-mode', isEditMode);
+    const lockBtn = document.getElementById('btnLock');
+    if (isEditMode) {
+      lockBtn.textContent = '🔓';
+      lockBtn.classList.add('unlocked');
+      lockBtn.title = 'Modalità modifica attiva: i cestini sono visibili. Clicca per bloccare.';
+    } else {
+      lockBtn.textContent = '🔒';
+      lockBtn.classList.remove('unlocked');
+      lockBtn.title = 'Modalità protetta: i cestini sono nascosti. Clicca per sbloccare.';
+    }
+  }
 
   function toggleSettings() {
     document.getElementById('settingsPanel').classList.toggle('open');
@@ -315,7 +313,6 @@
     renderTerms(document.getElementById('searchInput').value);
   });
 
-  // Funzione per importare file JSON direttamente sul Cloud Firebase
   function importDataToCloud(event) {
     const file = event.target.files[0];
     if (!file) return;
@@ -342,16 +339,6 @@
       event.target.value = '';
     };
     reader.readAsText(file);
-  }
-
-  async function seedDefaultTerms() {
-    if (!confirm('Vuoi sincronizzare i termini base su Firebase?')) return;
-    const updates = {};
-    initialTermsPack.forEach(term => {
-      const termId = term.term.toLowerCase().replace(/[^a-z0-9]/g, '_');
-      updates[termId] = term;
-    });
-    await db.ref('dev_lexicon_terms').update(updates);
   }
 
   function saveCloudApiKey() {
@@ -390,8 +377,10 @@
     `).join('');
   }
 
+  // Eliminazione sicura con conferma esplicita
   function deleteTerm(fbKey, termName) {
-    if (confirm(`Vuoi eliminare definitivamente "${termName}" dal database cloud?`)) {
+    const conf = confirm(`ATTENZIONE:\nVuoi eliminare definitivamente "${termName}" dal database cloud?\n\nQuesta operazione non può essere annullata.`);
+    if (conf) {
       db.ref('dev_lexicon_terms/' + fbKey).remove();
     }
   }
@@ -436,7 +425,9 @@
       <div class="term-card">
         <div class="card-header">
           <h2>${escapeHtml(item.term)}</h2>
-          <button class="btn-delete" title="Elimina dal Cloud" onclick="deleteTerm('${item._fbKey}', '${escapeHtml(item.term)}')">🗑️</button>
+          <button class="btn-delete" title="Elimina dal Cloud" onclick="deleteTerm('${item._fbKey}', '${escapeHtml(item.term)}')">
+            🗑️ Elimina
+          </button>
         </div>
         <div class="badge-group">
           <span class="category-badge">${escapeHtml(item.category || 'Generale')}</span>
