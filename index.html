@@ -271,7 +271,7 @@
       box-shadow: var(--glow);
     }
 
-    /* Barra Categorie & Pulsanti Studio / Quiz */
+    /* Barra Categorie & Pulsanti Avanzati */
     .categories-bar {
       display: flex; 
       gap: 0.6rem; 
@@ -333,6 +333,21 @@
       border-color: transparent;
       box-shadow: 0 0 15px rgba(14, 165, 233, 0.4);
     }
+    
+    /* Stile Cartelle Preferiti ad Alto Contrasto */
+    .cat-filter-btn.folder-pill {
+      background: rgba(251, 191, 36, 0.15) !important;
+      border: 1px solid rgba(251, 191, 36, 0.4) !important;
+      color: #ffffff !important;
+      font-weight: 600 !important;
+    }
+    .cat-filter-btn.folder-pill.active {
+      background: #fbbf24 !important;
+      color: #040813 !important;
+      border-color: #fbbf24 !important;
+      font-weight: 700 !important;
+      box-shadow: 0 0 15px rgba(251, 191, 36, 0.4);
+    }
 
     /* Switch Sintesi / Dettaglio */
     .view-toggle { 
@@ -363,7 +378,7 @@
       border: 1px solid var(--border);
     }
 
-    /* Flashcard / Study Container (Grafica Esatta Mantenuta) */
+    /* Flashcard / Study Container */
     .flashcard-wrapper {
       background: var(--card-bg);
       backdrop-filter: blur(16px);
@@ -501,6 +516,46 @@
       justify-content: flex-end;
       gap: 0.75rem;
     }
+
+    /* Sezione Note e Cartelle Preferiti */
+    .fav-meta-box {
+      margin-top: 1.25rem;
+      background: rgba(15, 23, 42, 0.7);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 1rem;
+    }
+    .fav-meta-row {
+      display: flex;
+      gap: 0.75rem;
+      align-items: center;
+      margin-bottom: 0.75rem;
+      flex-wrap: wrap;
+    }
+    .fav-select {
+      background: var(--code-bg);
+      border: 1px solid var(--border);
+      color: var(--text);
+      padding: 0.45rem 0.75rem;
+      border-radius: 8px;
+      font-size: 0.85rem;
+      outline: none;
+      cursor: pointer;
+    }
+    .fav-select:focus { border-color: var(--accent); }
+    .notes-textarea {
+      width: 100%;
+      background: var(--code-bg);
+      border: 1px solid var(--border);
+      color: var(--text);
+      padding: 0.75rem;
+      border-radius: 8px;
+      font-size: 0.9rem;
+      resize: vertical;
+      min-height: 60px;
+      outline: none;
+    }
+    .notes-textarea:focus { border-color: var(--accent); }
 
     /* Box Suggerimento "Forse cercavi" */
     .did-you-mean-box {
@@ -830,7 +885,7 @@
     <div class="header-titles">
       <div class="title-row">
         <h1>DevLexicon</h1>
-        <span class="version-pill">v2.4.0</span>
+        <span class="version-pill">v2.5.1</span>
       </div>
       <p>Enciclopedia Tecnica Cloud &amp; Auto-Apprendimento AI</p>
     </div>
@@ -904,7 +959,7 @@
     </div>
   </div>
 
-  <!-- Categorie Dinamiche & Pulsanti Dual Mode -->
+  <!-- Categorie Dinamiche & Preferiti Avanzati -->
   <div class="categories-bar" id="categoriesBar"></div>
 
   <!-- Switch Modalità (visibile solo in ricerca normale) -->
@@ -926,7 +981,7 @@
     Software Engineered &amp; Designed by: <span class="brand-highlight">GC CodeLab</span> • <span class="brand-author">Giovanni Cavallo</span>
   </div>
   <div class="brand-rights">
-    © <span id="currentYear"></span> DevLexicon • Tutti i diritti riservati • <span class="footer-version">v2.4.0 Interactive Pro</span>
+    © <span id="currentYear"></span> DevLexicon • Tutti i diritti riservati • <span class="footer-version">v2.5.1 Interactive Pro</span>
   </div>
 </footer>
 
@@ -954,14 +1009,17 @@
 
   let glossary = [];
   let favorites = JSON.parse(localStorage.getItem('devlex_favorites') || '[]');
+  let favFolders = JSON.parse(localStorage.getItem('devlex_fav_folders') || '{}');
+  let favNotes = JSON.parse(localStorage.getItem('devlex_fav_notes') || '{}');
+  
   let activeGeminiKey = '';
   let currentMode = 'summary';
   let selectedCategory = 'ALL';
+  let selectedFavFolder = 'ALL';
   let isEditMode = false;
   let retryCountdownTimer = null;
   let currentFlashcardIndex = 0;
   
-  // Stati Quiz
   let quizScore = 0;
   let currentQuizData = null;
 
@@ -1168,12 +1226,28 @@
   function toggleFavorite(termId) {
     if (favorites.includes(termId)) {
       favorites = favorites.filter(id => id !== termId);
+      delete favFolders[termId];
+      delete favNotes[termId];
     } else {
       favorites.push(termId);
+      favFolders[termId] = 'Generale';
+      favNotes[termId] = '';
     }
     localStorage.setItem('devlex_favorites', JSON.stringify(favorites));
+    localStorage.setItem('devlex_fav_folders', JSON.stringify(favFolders));
+    localStorage.setItem('devlex_fav_notes', JSON.stringify(favNotes));
     renderCategories();
     renderTerms(document.getElementById('searchInput').value);
+  }
+
+  function updateFavFolder(termId, folderName) {
+    favFolders[termId] = folderName;
+    localStorage.setItem('devlex_fav_folders', JSON.stringify(favFolders));
+  }
+
+  function updateFavNote(termId, noteText) {
+    favNotes[termId] = noteText;
+    localStorage.setItem('devlex_fav_notes', JSON.stringify(favNotes));
   }
 
   function speakTerm(btn, textToSpeak) {
@@ -1319,9 +1393,11 @@
     renderTerms(document.getElementById('searchInput').value);
   }
 
-  function setCategory(cat) {
+  function setCategory(cat, folder = 'ALL') {
     selectedCategory = cat;
+    selectedFavFolder = folder;
     renderCategories();
+    
     if (cat === 'STUDY_MODE') {
       document.getElementById('searchSection').style.display = 'none';
       document.getElementById('viewToggleBox').style.display = 'none';
@@ -1341,31 +1417,37 @@
   }
 
   function renderCategories() {
-    const categories = ['ALL', 'FAVORITES', 'STUDY_MODE', 'QUIZ_MODE', ...new Set(glossary.map(item => item.category || 'Generale'))];
-    
-    categoriesBarElement.innerHTML = categories.map(cat => {
-      let label = cat;
-      let extraClass = '';
-      if (cat === 'ALL') label = 'Tutte le Categorie';
-      if (cat === 'FAVORITES') {
-        label = `⭐ Preferiti (${favorites.length})`;
-        extraClass = 'favorites-btn';
-      }
-      if (cat === 'STUDY_MODE') {
-        label = '🎮 Modalità Flashcard';
-        extraClass = 'study-mode-btn';
-      }
-      if (cat === 'QUIZ_MODE') {
-        label = '🎯 Sfida Multipla';
-        extraClass = 'quiz-mode-btn';
-      }
-      return `
-        <button class="cat-filter-btn ${extraClass} ${selectedCategory === cat ? 'active' : ''}" 
-                onclick="setCategory('${escapeHtml(cat)}')">
-          ${escapeHtml(label)}
+    let categoriesHtml = `
+      <button class="cat-filter-btn ${selectedCategory === 'ALL' ? 'active' : ''}" onclick="setCategory('ALL')">Tutte le Categorie</button>
+      <button class="cat-filter-btn favorites-btn ${selectedCategory === 'FAVORITES' && selectedFavFolder === 'ALL' ? 'active' : ''}" onclick="setCategory('FAVORITES', 'ALL')">⭐ Preferiti (${favorites.length})</button>
+    `;
+
+    if (selectedCategory === 'FAVORITES') {
+      const folders = ['Generale', 'Da Ripassare', 'Colloquio', 'Architettura'];
+      folders.forEach(f => {
+        categoriesHtml += `
+          <button class="cat-filter-btn folder-pill ${selectedFavFolder === f ? 'active' : ''}" onclick="setCategory('FAVORITES', '${f}')">
+            📁 ${f}
+          </button>
+        `;
+      });
+    }
+
+    categoriesHtml += `
+      <button class="cat-filter-btn study-mode-btn ${selectedCategory === 'STUDY_MODE' ? 'active' : ''}" onclick="setCategory('STUDY_MODE')">🎮 Modalità Flashcard</button>
+      <button class="cat-filter-btn quiz-mode-btn ${selectedCategory === 'QUIZ_MODE' ? 'active' : ''}" onclick="setCategory('QUIZ_MODE')">🎯 Sfida Multipla</button>
+    `;
+
+    const standardCats = [...new Set(glossary.map(item => item.category || 'Generale'))];
+    standardCats.forEach(cat => {
+      categoriesHtml += `
+        <button class="cat-filter-btn ${selectedCategory === cat ? 'active' : ''}" onclick="setCategory('${escapeHtml(cat)}')">
+          ${escapeHtml(cat)}
         </button>
       `;
-    }).join('');
+    });
+
+    categoriesBarElement.innerHTML = categoriesHtml;
   }
 
   function deleteTerm(fbKey, termName) {
@@ -1398,26 +1480,40 @@
     a.remove();
   }
 
+  function getStudyPool() {
+    if (selectedCategory === 'FAVORITES') {
+      let pool = glossary.filter(item => favorites.includes(item._fbKey));
+      if (selectedFavFolder !== 'ALL') {
+        pool = pool.filter(item => (favFolders[item._fbKey] || 'Generale') === selectedFavFolder);
+      }
+      return pool;
+    }
+    return glossary;
+  }
+
   // --- RENDER MODALITÀ FLASHCARD ---
   function renderStudyMode() {
     const listContainer = document.getElementById('termsList');
-    if (glossary.length === 0) {
-      listContainer.innerHTML = `<div class="not-found-box"><p>Nessun concetto disponibile per lo studio.</p></div>`;
+    const pool = getStudyPool();
+
+    if (pool.length === 0) {
+      listContainer.innerHTML = `<div class="not-found-box"><p>Nessun concetto disponibile in questa sezione per le Flashcard. Aggiungi qualche scheda ai Preferiti!</p></div>`;
       return;
     }
 
-    if (currentFlashcardIndex >= glossary.length) currentFlashcardIndex = 0;
-    const item = glossary[currentFlashcardIndex];
+    if (currentFlashcardIndex >= pool.length) currentFlashcardIndex = 0;
+    const item = pool[currentFlashcardIndex];
     const speechText = `${item.term}. ${item.summary}`;
 
     listContainer.innerHTML = `
       <div class="flashcard-wrapper">
-        <div class="flashcard-category">Flashcard (${currentFlashcardIndex + 1} di ${glossary.length}) • ${escapeHtml(item.category || 'Generale')}</div>
+        <div class="flashcard-category">Flashcard (${currentFlashcardIndex + 1} di ${pool.length}) • ${escapeHtml(item.category || 'Generale')}</div>
         <div class="flashcard-title">${escapeHtml(item.term)}</div>
         
         <div class="flashcard-hidden-content" id="flashcardContent">
           <p class="text-content" style="margin-bottom: 1rem;"><strong>Definizione:</strong> ${escapeHtml(item.summary)}</p>
           ${item.useCase ? `<p class="text-content"><strong>Scenario:</strong> ${escapeHtml(item.useCase)}</p>` : ''}
+          ${favNotes[item._fbKey] ? `<p class="text-content" style="margin-top:0.75rem; color:#fde68a;"><strong>Nota Personale:</strong> ${escapeHtml(favNotes[item._fbKey])}</p>` : ''}
         </div>
 
         <div>
@@ -1435,19 +1531,22 @@
   }
 
   function nextFlashcard() {
-    currentFlashcardIndex = (currentFlashcardIndex + 1) % glossary.length;
+    const pool = getStudyPool();
+    currentFlashcardIndex = (currentFlashcardIndex + 1) % pool.length;
     renderStudyMode();
   }
 
   // --- GENERATORE SFIDA MULTIPLA ---
   function generateNewQuiz() {
     const listContainer = document.getElementById('termsList');
-    if (glossary.length < 3) {
-      listContainer.innerHTML = `<div class="not-found-box"><p>Servono almeno 3 concetti memorizzati per generare le sfide a risposta multipla!</p></div>`;
+    const pool = getStudyPool();
+
+    if (pool.length < 3) {
+      listContainer.innerHTML = `<div class="not-found-box"><p>Servono almeno 3 concetti in questa sezione per generare le sfide a risposta multipla!</p></div>`;
       return;
     }
 
-    const correctItem = glossary[Math.floor(Math.random() * glossary.length)];
+    const correctItem = pool[Math.floor(Math.random() * pool.length)];
     let distractors = glossary.filter(i => i.term !== correctItem.term);
     distractors.sort(() => 0.5 - Math.random());
     const selectedDistractors = distractors.slice(0, 2);
@@ -1518,7 +1617,14 @@
     didYouMeanContainer.innerHTML = '';
 
     let categoryPool = glossary.filter(item => {
-      if (selectedCategory === 'FAVORITES') return favorites.includes(item._fbKey);
+      if (selectedCategory === 'FAVORITES') {
+        const isFav = favorites.includes(item._fbKey);
+        if (!isFav) return false;
+        if (selectedFavFolder !== 'ALL') {
+          return (favFolders[item._fbKey] || 'Generale') === selectedFavFolder;
+        }
+        return true;
+      }
       if (selectedCategory === 'ALL') return true;
       return item.category === selectedCategory;
     });
@@ -1593,7 +1699,7 @@
     if (items.length === 0 && selectedCategory === 'FAVORITES') {
       listContainer.innerHTML = `
         <div class="not-found-box">
-          <p>Nessun termine aggiunto ai preferiti. Clicca sulla stellina (⭐) di qualsiasi scheda per salvarla qui!</p>
+          <p>Nessun termine aggiunto ai preferiti in questa cartella. Clicca sulla stellina (⭐) di qualsiasi scheda per salvarla qui!</p>
         </div>
       `;
       return;
@@ -1602,6 +1708,8 @@
     listContainer.innerHTML = items.map(item => {
       const isFav = favorites.includes(item._fbKey);
       const speechText = `${item.term}. ${item.summary}. ${item.useCase || ''}`;
+      const currentFolder = favFolders[item._fbKey] || 'Generale';
+      const currentNote = favNotes[item._fbKey] || '';
 
       return `
         <div class="term-card">
@@ -1627,6 +1735,21 @@
           <p class="text-content">
             ${escapeHtml(currentMode === 'summary' ? item.summary : item.detail)}
           </p>
+
+          ${isFav ? `
+            <div class="fav-meta-box">
+              <div class="fav-meta-row">
+                <label style="font-size:0.8rem; font-weight:700; color:var(--accent);">📁 Cartella Preferiti:</label>
+                <select class="fav-select" onchange="updateFavFolder('${item._fbKey}', this.value)">
+                  <option value="Generale" ${currentFolder === 'Generale' ? 'selected' : ''}>Generale</option>
+                  <option value="Da Ripassare" ${currentFolder === 'Da Ripassare' ? 'selected' : ''}>Da Ripassare</option>
+                  <option value="Colloquio" ${currentFolder === 'Colloquio' ? 'selected' : ''}>Colloquio</option>
+                  <option value="Architettura" ${currentFolder === 'Architettura' ? 'selected' : ''}>Architettura</option>
+                </select>
+              </div>
+              <textarea class="notes-textarea" placeholder="Scrivi una nota personale su questo concetto..." oninput="updateFavNote('${item._fbKey}', this.value)">${escapeHtml(currentNote)}</textarea>
+            </div>
+          ` : ''}
 
           ${currentMode === 'detail' ? `
             ${item.useCase ? `
