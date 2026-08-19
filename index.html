@@ -27,8 +27,16 @@
     }
 
     * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', system-ui, sans-serif; }
-    body { background-color: var(--bg); color: var(--text); padding: 2rem 1rem; display: flex; justify-content: center; }
-    .container { width: 100%; max-width: 900px; }
+    body { 
+      background-color: var(--bg); 
+      color: var(--text); 
+      padding: 2rem 1rem 1rem 1rem; 
+      display: flex; 
+      flex-direction: column; 
+      align-items: center; 
+      min-height: 100vh; 
+    }
+    .container { width: 100%; max-width: 900px; flex: 1; }
 
     /* Header */
     .header-box { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem; }
@@ -70,6 +78,8 @@
     .btn-action:hover { background: #475569; }
     .btn-action.btn-seed { background: #0369a1; font-weight: 600; }
     .btn-action.btn-seed:hover { background: #0284c7; }
+    .btn-action.btn-import { background: #0d9488; font-weight: 600; }
+    .btn-action.btn-import:hover { background: #0f766e; }
 
     /* Ricerca */
     .search-box { display: flex; gap: 0.5rem; margin-bottom: 1rem; }
@@ -148,6 +158,34 @@
     }
     .btn-search-web:hover { background: var(--accent-hover); }
     .spinner { display: inline-block; margin-top: 1rem; color: var(--accent); font-weight: 600; }
+
+    /* Footer Marchio Personale */
+    footer {
+      margin-top: 3rem;
+      padding: 1.5rem 0 1rem 0;
+      text-align: center;
+      border-top: 1px solid rgba(51, 65, 85, 0.6);
+      width: 100%;
+      max-width: 900px;
+    }
+    .brand-attribution {
+      font-size: 0.88rem;
+      color: var(--text-muted);
+      letter-spacing: 0.5px;
+      margin-bottom: 0.35rem;
+    }
+    .brand-highlight {
+      color: var(--accent);
+      font-weight: 700;
+    }
+    .brand-author {
+      color: #e2e8f0;
+      font-weight: 600;
+    }
+    .brand-rights {
+      font-size: 0.75rem;
+      color: #64748b;
+    }
   </style>
 </head>
 <body>
@@ -170,21 +208,23 @@
     </div>
   </div>
 
-  <!-- Barra Info, Inizializzazione & Backup -->
+  <!-- Barra Info, Inizializzazione, Import & Backup -->
   <div class="tools-bar">
     <div>
       <span id="termCount">Caricamento dal cloud...</span>
       <span class="sync-badge" id="syncStatus"> ● Cloud Connesso</span>
     </div>
     <div class="tools-buttons">
-      <button class="btn-action btn-seed" onclick="seedDefaultTerms()">📥 Carica Enciclopedia Base (+60 Termini)</button>
+      <button class="btn-action btn-import" onclick="document.getElementById('importFile').click()">📂 Importa JSON</button>
+      <input type="file" id="importFile" accept=".json" style="display: none;" onchange="importDataToCloud(event)">
+      <button class="btn-action btn-seed" onclick="seedDefaultTerms()">📥 Carica Base (+60)</button>
       <button class="btn-action" onclick="exportData()">💾 Backup Locale</button>
     </div>
   </div>
 
   <!-- Barra Ricerca -->
   <div class="search-box">
-    <input type="text" id="searchInput" placeholder="Cerca tra oltre 60 concetti (es. Docker, Sharding, CORS, RAG, Event Loop)...">
+    <input type="text" id="searchInput" placeholder="Cerca un concetto tecnico...">
   </div>
 
   <!-- Categorie Dinamiche -->
@@ -193,14 +233,26 @@
   <!-- Switch Modalità -->
   <div class="view-toggle">
     <button class="btn-toggle active" id="btnSummary" onclick="setViewMode('summary')">Modalità Sintetica</button>
-    <button class="btn-toggle" id="btnDetail" onclick="setViewMode('detail')">Modalità Dettagliata (con Esempi di Codice)</button>
+    <button class="btn-toggle" id="btnDetail" onclick="setViewMode('detail')">Modalità Dettagliata (con Codice)</button>
   </div>
 
   <!-- Risultati -->
   <div id="termsList"></div>
 </div>
 
+<!-- Footer con Attribuzione -->
+<footer>
+  <div class="brand-attribution">
+    Software Engineered &amp; Designed by: <span class="brand-highlight">GC CodeLab</span> • <span class="brand-author">Giovanni Cavallo</span>
+  </div>
+  <div class="brand-rights">
+    © <span id="currentYear"></span> DevLexicon • Tutti i diritti riservati
+  </div>
+</footer>
+
 <script>
+  document.getElementById('currentYear').textContent = new Date().getFullYear();
+
   if ('serviceWorker' in navigator) {
     window.addEventListener('load', () => {
       navigator.serviceWorker.register('./sw.js').catch(err => console.log(err));
@@ -220,411 +272,13 @@
   firebase.initializeApp(firebaseConfig);
   const db = firebase.database();
 
-  // PACCHETTO DI OLTRE 60 TERMINI APPROFONDITI E CATEGORIZZATI
   const initialTermsPack = [
-    // --- ARCHITETTURA & PATTERN ---
     {
       term: "Architettura a Microservizi",
       category: "Architettura",
-      summary: "Approccio architetturale in cui un'applicazione è disaccoppiata in una suite di servizi indipendenti, autonomi e comunicanti via rete.",
-      detail: "Ogni microservizio possiede una propria base di codice, logica di business e spesso un proprio database dedicato. Favorisce il deploy indipendente e la scalabilità mirata rispetto ai monoliti.",
-      code: `[Client Web/Mobile]\n        │ (HTTPS)\n  [API Gateway]\n   ├── [Auth Service] (PostgreSQL)\n   ├── [Fleet Service] (MongoDB)\n   └── [Billing Service] (MySQL)`,
-      autoFetched: false
-    },
-    {
-      term: "Architettura Esagonale (Ports & Adapters)",
-      category: "Architettura",
-      summary: "Pattern architetturale che isola il dominio e la logica di business fondamentale da framework esterni, database e interfacce grafiche.",
-      detail: "Il nucleo applicativo comunica con il mondo esterno tramite 'Porte' (interfacce astratte) implementate da 'Adattatori' (es. driver DB, controller REST, code). Rende il software testabile e indipendente dalle tecnologie esterne.",
-      code: `// Porta (Interfaccia Dominio)\ninterface VehicleRepository {\n  findById(id: string): Promise<Vehicle>;\n}\n\n// Adattatore (Infrastruttura)\nclass PostgresVehicleRepo implements VehicleRepository {\n  async findById(id: string) { return await db.query('SELECT * FROM vehicles WHERE id = $1', [id]); }\n}`,
-      autoFetched: false
-    },
-    {
-      term: "CQRS (Command Query Responsibility Segregation)",
-      category: "Architettura",
-      summary: "Pattern architetturale che separa nettamente le operazioni di lettura (Query) da quelle di scrittura/modifica (Command).",
-      detail: "Permette di ottimizzare modelli dati differenti: una struttura normalizzata e protetta da vincoli per la scrittura e una struttura denormalizzata, ad alte prestazioni o in sola lettura per le query complesse.",
-      code: `// Command: Modifica lo stato\nclass RegisterDriverCommand { constructor(public driverData: DriverDto) {} }\n\n// Query: Recupera dati ottimizzati\nclass GetDriverScheduleQuery { constructor(public vehicleId: string) {} }`,
-      autoFetched: false
-    },
-    {
-      term: "Event-Driven Architecture (EDA)",
-      category: "Architettura",
-      summary: "Architettura software asincrona basata sulla produzione, rilevamento e consumo di eventi distribuiti.",
-      detail: "I componenti non invocano direttamente altri moduli (disaccoppiamento temporale e spaziale), ma pubblicano eventi su un message broker (es. Apache Kafka, RabbitMQ) che vengono elaborati asincronamente da uno o più sottoscrittori.",
-      code: `// Pubblicazione Evento\neventEmitter.emit('DRIVER_CARD_DOWNLOADED', {\n  driverId: 'D_102',\n  downloadDate: new Date(),\n  nextDeadlineDays: 28\n});`,
-      autoFetched: false
-    },
-    {
-      term: "Singleton Pattern",
-      category: "Architettura",
-      summary: "Design pattern creazionale che garantisce che una determinata classe abbia un'unica istanza globale accessibile ovunque.",
-      detail: "Viene impiegato per risorse centralizzate condivise che richiedono un unico punto di coordinamento, come pool di connessione al database, logger di sistema o configurazioni globali.",
-      code: `class DatabasePool {\n  private static instance: DatabasePool;\n  private constructor() { /* inizializza pool */ }\n  public static getInstance(): DatabasePool {\n    if (!DatabasePool.instance) DatabasePool.instance = new DatabasePool();\n    return DatabasePool.instance;\n  }\n}`,
-      autoFetched: false
-    },
-    {
-      term: "Dependency Injection (DI)",
-      category: "Architettura",
-      summary: "Tecnica in cui un oggetto riceve le proprie dipendenze dall'esterno anziché crearle internamente.",
-      detail: "Facilita il principio di inversione del controllo (IoC) e rende il codice facilmente testabile, permettendo di sostituire dipendenze reali con mock o stub nei test automatizzati.",
-      code: `class NotificationService {\n  constructor(private emailSender: EmailClient) {}\n  sendDeadlineAlert(to: string) {\n    this.emailSender.send(to, 'Scadenza imminente!');\n  }\n}`,
-      autoFetched: false
-    },
-
-    // --- FRONTEND & WEB PLATFORM ---
-    {
-      term: "Virtual DOM",
-      category: "Frontend",
-      summary: "Rappresentazione virtuale e leggera del DOM mantenuta in memoria da framework moderni come React o Vue.",
-      detail: "A ogni cambio di stato, viene generato un nuovo albero virtuale. Un algoritmo di riconciliazione ('diffing') calcola la differenza minima con l'albero precedente e aggiorna solo i nodi reali necessari, massimizzando le performance.",
-      code: `// React Element (nodo Virtual DOM leggero)\nconst element = React.createElement('h1', { className: 'title' }, 'TachoControl Fleet');`,
-      autoFetched: false
-    },
-    {
-      term: "Service Worker",
-      category: "Frontend",
-      summary: "Script eseguito dal browser in background, separato dal thread della pagina web, fondamentale per le PWA.",
-      detail: "Intercetta le richieste di rete HTTP, gestisce strategie di caching avanzate (Cache-First, Network-First), consente il funzionamento offline e riceve notifiche push in background anche ad app chiusa.",
-      code: `self.addEventListener('fetch', (event) => {\n  event.respondWith(\n    caches.match(event.request).then((cached) => cached || fetch(event.request))\n  );\n});`,
-      autoFetched: false
-    },
-    {
-      term: "Web Workers",
-      category: "Frontend",
-      summary: "API del browser che consente l'esecuzione di script JavaScript in thread paralleli in background senza bloccare la UI.",
-      detail: "Poiché il thread principale di JavaScript gestisce il rendering e gli eventi utente, operazioni computazionalmente pesanti (es. decodifica file tachigrafo DDD, crittografia) possono essere delegate a un Worker.",
-      code: `// Main Thread\nconst worker = new Worker('parserWorker.js');\nworker.postMessage(rawBinaryBuffer);\nworker.onmessage = (e) => console.log('File elaborato:', e.data);`,
-      autoFetched: false
-    },
-    {
-      term: "React Hooks (useState, useEffect)",
-      category: "Frontend",
-      summary: "Funzioni speciali che consentono ai componenti funzionali di utilizzare lo stato e le funzionalità del ciclo di vita.",
-      detail: "`useState` mantiene lo stato locale ri-renderizzando il componente alle variazioni; `useEffect` gestisce gli effetti collaterali (chiamate API, sottoscrizioni a stream, timer) sincronizzandosi con il ciclo di vita.",
-      code: `import { useState, useEffect } from 'react';\n\nfunction DriverCard() {\n  const [days, setDays] = useState(28);\n  useEffect(() => {\n    console.log('Giorni aggiornati a:', days);\n  }, [days]);\n  return <button onClick={() => setDays(days - 1)}>Riduci</button>;\n}`,
-      autoFetched: false
-    },
-    {
-      term: "Hydration (SSR)",
-      category: "Frontend",
-      summary: "Processo in cui un framework lato client (React/Vue) si collega all'HTML statico pre-renderizzato dal server rendendolo interattivo.",
-      detail: "Nel Server-Side Rendering (SSR), il server invia HTML già pronto per un primo caricamento rapido. Nel browser, il runtime JavaScript esegue l'hydration associando i listener di eventi al markup esistente senza ricreare la pagina.",
-      code: `// Idratazione React sul DOM lato client\nimport { hydrateRoot } from 'react-dom/client';\nhydrateRoot(document.getElementById('root'), <App />);`,
-      autoFetched: false
-    },
-    {
-      term: "CSS Box Model",
-      category: "Frontend",
-      summary: "Modello geometrico fondamentale che definisce lo spazio occupato da ogni elemento HTML sul layout della pagina.",
-      detail: "È composto dall'interno verso l'esterno da: Content (contenuto reale), Padding (spazio interno), Border (bordo) e Margin (spazio esterno). L'impostazione `box-sizing: border-box` include padding e border nella larghezza totale.",
-      code: `* {\n  box-sizing: border-box; /* Larghezza include padding e bordo */\n  margin: 0;\n  padding: 0;\n}`,
-      autoFetched: false
-    },
-
-    // --- BACKEND & RUNTIME ---
-    {
-      term: "Event Loop (Node.js / JS)",
-      category: "Backend",
-      summary: "Meccanismo a singolo thread che gestisce l'esecuzione asincrona non bloccante in JavaScript delegando I/O al sistema.",
-      detail: "Monitora il Call Stack e la Callback Queue: quando il call stack è vuoto, sposta i callback pronti (timer, I/O su file o rete) nello stack per l'esecuzione, consentendo a Node.js di servire migliaia di connessioni concorrenti.",
-      code: `console.log('1 - Inizio');\nsetTimeout(() => console.log('2 - Callback Timer'), 0); // Asincrono\nconsole.log('3 - Fine');\n// Output: 1, 3, 2`,
-      autoFetched: false
-    },
-    {
-      term: "Concorrenza vs Parallelismo",
-      category: "Backend",
-      summary: "La concorrenza riguarda la gestione di più compiti contemporaneamente; il parallelismo riguarda l'esecuzione simultanea su più core fisici.",
-      detail: "Un sistema concorrente può alternare rapidamente compiti su una singola CPU (time-slicing o I/O multiplexing). Il parallelismo richiede hardware multi-core per calcoli fisicamente simultanei.",
-      code: `// Concorrenza (Node.js I/O asincrono su singolo thread):\nPromise.all([fetchVehicles(), fetchDrivers()]);\n\n// Parallelismo (Worker threads su core separati):\nconst { Worker } = require('worker_threads');`,
-      autoFetched: false
-    },
-    {
-      term: "Connection Pooling",
-      category: "Backend",
-      summary: "Tecnica che mantiene una cache di connessioni al database attive e riutilizzabili per evitare il sovraccarico di connessioni continue.",
-      detail: "Aprire una connessione TCP con handshake e autenticazione verso il DB è un'operazione onerosa. Il pool alloca un numero prefissato di socket riutilizzati dalle richieste backend man mano che si liberano.",
-      code: `const { Pool } = require('pg');\nconst pool = new Pool({ max: 20, idleTimeoutMillis: 30000 });\nconst client = await pool.connect();\nconst res = await client.query('SELECT * FROM flotta');\nclient.release();`,
-      autoFetched: false
-    },
-    {
-      term: "Memory Leak",
-      category: "Backend",
-      summary: "Condizione anomala in cui la memoria allocata da un programma non viene liberata dal Garbage Collector.",
-      detail: "Spesso causata da listener di eventi mai rimossi, riferimenti globali non puliti o closure che trattengono oggetti di grandi dimensioni, portando all'esaurimento della RAM e al crash del processo (`Out of Memory`).",
-      code: `// Esempio tipico di leak:\nconst leakArray = [];\nsetInterval(() => {\n  leakArray.push(new Buffer.alloc(1024 * 1024)); // Cresce indefinitamente\n}, 100);`,
-      autoFetched: false
-    },
-    {
-      term: "Node.js Streams",
-      category: "Backend",
-      summary: "Interfacce per leggere o scrivere dati in modo continuo e frammentato (chunk by chunk) senza caricare l'intero file in RAM.",
-      detail: "Indispensabili per manipolare file di grandi dimensioni, log o video streaming con bassissimo consumo di memoria grazie al controllo del backpressure.",
-      code: `const fs = require('fs');\nconst readStream = fs.createReadStream('archivio_pesante.zip');\nconst writeStream = fs.createWriteStream('copia.zip');\nreadStream.pipe(writeStream);`,
-      autoFetched: false
-    },
-
-    // --- DATABASE & STORAGE ---
-    {
-      term: "Transazioni ACID",
-      category: "Database",
-      summary: "Insieme di 4 proprietà fondamentali che garantiscono l'affidabilità e l'integrità dei dati nei database relazionali.",
-      detail: "Atomicity (tutto o niente), Consistency (rispetto dei vincoli), Isolation (transazioni concorrenti separate), Durability (dati salvati anche dopo un crash hardware).",
-      code: `BEGIN TRANSACTION;\nUPDATE conti SET saldo = saldo - 500 WHERE utente_id = 1;\nUPDATE conti SET saldo = saldo + 500 WHERE utente_id = 2;\nCOMMIT; -- Se fallisce un'istruzione: ROLLBACK;`,
-      autoFetched: false
-    },
-    {
-      term: "Database Sharding",
-      category: "Database",
-      summary: "Metodo di partizionamento orizzontale che divide una tabella gigante memorizzandola su più server database separati.",
-      detail: "Ogni frammento ('shard') contiene un sottoinsieme di righe identificato tramite una chiave di sharding (es. `company_id` o `country_code`), permettendo scalabilità orizzontale a livello di terabyte.",
-      code: `// Routing tramite Shard Key\nfunction getDatabaseNode(companyId) {\n  return companyId % 2 === 0 ? 'db-cluster-nodeA' : 'db-cluster-nodeB';\n}`,
-      autoFetched: false
-    },
-    {
-      term: "Teorema CAP",
-      category: "Database",
-      summary: "Principio teorico che stabilisce che un sistema distribuito può garantire al massimo due proprietà su tre: Coerenza, Disponibilità, Tolleranza alle partizioni.",
-      detail: "In presenza di partizioni di rete (P), un database distribuito deve scegliere se privilegiare dati sempre coerenti e aggiornati (CP, es. HBase, CockroachDB) o rispondere sempre anche con dati parzialmente disallineati (AP, es. Cassandra, DynamoDB).",
-      code: `Consistency (Coerenza) ──── Availability (Disponibilità)\n           \\                 /\n            \\               /\n        Partition Tolerance (Tolleranza)`,
-      autoFetched: false
-    },
-    {
-      term: "Redis (In-Memory Cache)",
-      category: "Database",
-      summary: "Store dati chiave-valore in-memory ad altissime prestazioni utilizzato per caching, sessioni e code veloci.",
-      detail: "Memorizzando i dati interamente nella memoria RAM con persistenza opzionale su disco, garantisce tempi di risposta sub-millisecondo per query frequenti o calcolo di rate-limiting.",
-      code: `// Caching con Redis\nconst cached = await redis.get('scadenze_flotta');\nif (cached) return JSON.parse(cached);\nconst data = await fetchFromPostgres();\nawait redis.setex('scadenze_flotta', 3600, JSON.stringify(data)); // TTL 1 ora`,
-      autoFetched: false
-    },
-    {
-      term: "Normalizzazione Database (1NF, 2NF, 3NF)",
-      category: "Database",
-      summary: "Processo di organizzazione dei campi e delle tabelle di un database per ridurre la ridondanza e prevenire anomalie di modifica.",
-      detail: "1NF: valori atomici; 2NF: dipendenza funzionale completa dalla chiave primaria; 3NF: rimozione delle dipendenze transitive (nessun attributo non-chiave dipende da un altro attributo non-chiave).",
-      code: `-- Tabella Normalizzata (3NF)\nCREATE TABLE veicoli (\n  id SERIAL PRIMARY KEY,\n  targa VARCHAR(10) UNIQUE,\n  autista_id INT REFERENCES autisti(id)\n);`,
-      autoFetched: false
-    },
-
-    // --- DEVOPS & CONTAINER ---
-    {
-      term: "Docker Layer Caching",
-      category: "DevOps",
-      summary: "Meccanismo di build di Docker che riutilizza strati intermedi immutati per velocizzare la compilazione delle immagini.",
-      detail: "Ogni istruzione nel `Dockerfile` (es. `COPY`, `RUN`) crea un layer. Se i file sorgenti del layer non sono cambiati rispetto alla build precedente, Docker usa la cache saltando l'esecuzione.",
-      code: `# Ottimizzato: scarica le dipendenze prima del codice\nCOPY package*.json ./\nRUN npm install # Layer in cache se package.json non cambia\nCOPY . .`,
-      autoFetched: false
-    },
-    {
-      term: "Kubernetes (K8s) & Pods",
-      category: "DevOps",
-      summary: "Piattaforma open-source di orchestrazione automatizzata di container per scaling, self-healing e deployment.",
-      detail: "Il `Pod` è la più piccola unità computazionale di K8s e incapsula uno o più container che condividono storage, rete e spazio IP.",
-      code: `apiVersion: v1\nkind: Pod\nmetadata:\n  name: tacho-backend-pod\nspec:\n  containers:\n  - name: api\n    image: gcr.io/azienda/tacho-api:v2.0\n    ports:\n    - containerPort: 8080`,
-      autoFetched: false
-    },
-    {
-      term: "Infrastructure as Code (IaC)",
-      category: "DevOps",
-      summary: "Pratica di gestione e provisioning dell'infrastruttura IT tramite file di configurazione dichiarativi versionati su Git.",
-      detail: "Strumenti come Terraform, OpenTofu o Ansible consentono di creare macchine virtuali, database e reti in cloud in modo riproducibile, eliminando configurazioni manuali soggette a errore.",
-      code: `# Terraform: Creazione automatica di un bucket Cloud\nresource "google_storage_bucket" "tacho_bucket" {\n  name     = "vi-cla-tacho-storage"\n  location = "EUROPE-WEST1"\n}`,
-      autoFetched: false
-    },
-    {
-      term: "Git Rebase vs Merge",
-      category: "DevOps",
-      summary: "Due strategie fondamentali per integrare modifiche da un ramo Git all'altro con impatto diverso sulla cronologia.",
-      detail: "Il `merge` crea un commit di unione preservando la cronologia ramificata esatta; il `rebase` riscrive i commit del ramo corrente applicandoli sopra la punta del ramo target per una cronologia lineare.",
-      code: `# Rebase: cronologia lineare pulita\ngit checkout feature-flotta\ngit rebase main\n\n# Merge: preserva il grafo esatto\ngit merge feature-flotta`,
-      autoFetched: false
-    },
-
-    // --- CLOUD & SISTEMI DISTRIBUITI ---
-    {
-      term: "Content Delivery Network (CDN)",
-      category: "Cloud",
-      summary: "Rete distribuita globalmente di server proxy che consegnano contenuti statici con latenza minima in base alla posizione dell'utente.",
-      detail: "Memorizza in cache file CSS, JS, immagini e video nei nodi 'Edge' geograficamente più vicini all'utente, riducendo il carico sui server centrali e migliorando drasticamente il TTFB (Time to First Byte).",
-      code: `[Utente a Napoli] ──> [Edge Server CDN Roma (Cache Hit: 15ms)] ──x (Non tocca l'Origin in Germania)`,
-      autoFetched: false
-    },
-    {
-      term: "Circuit Breaker Pattern",
-      category: "Cloud",
-      summary: "Pattern di resilienza che interrompe le chiamate a un servizio esterno degradato o non funzionante per evitare il collasso a catena.",
-      detail: "Ha tre stati: Closed (funzionamento normale), Open (chiamate bloccate istantaneamente restituendo fallback immediato), Half-Open (invio di richieste di test per verificare se il servizio si è ripreso).",
-      code: `const breaker = new CircuitBreaker(chiamataServizioEsterno, { timeout: 3000, errorThresholdPercentage: 50 });\nbreaker.fallback(() => ({ status: 'Dati temporaneamente non disponibili' }));`,
-      autoFetched: false
-    },
-    {
-      term: "Load Balancing (Bilanciamento del Carico)",
-      category: "Cloud",
-      summary: "Distribuzione del traffico di rete in entrata su un gruppo di server backend per ottimizzare prestazioni e affidabilità.",
-      detail: "I bilanciatori utilizzano algoritmi come Round Robin, Least Connections o IP Hash e monitorano la salute dei server (`health check`) escludendo automaticamente nodi guasti.",
-      code: `# Esempio configurazione NGINX Load Balancer\nupstream backend_servers {\n  server 10.0.0.1:3000;\n  server 10.0.0.2:3000;\n}\nserver {\n  location / { proxy_pass http://backend_servers; }\n}`,
-      autoFetched: false
-    },
-
-    // --- SICUREZZA & CRITTOGRAFIA ---
-    {
-      term: "OAuth 2.0 & OpenID Connect",
-      category: "Sicurezza",
-      summary: "Protocollo standard di settore per l'autorizzazione delegata (OAuth 2.0) e layer di autenticazione dell'identità (OIDC).",
-      detail: "Consente a un'applicazione di accedere a risorse protette per conto di un utente (es. 'Accedi con Google') senza dover mai maneggiare o conoscere la password dell'utente.",
-      code: `// Redirect di autorizzazione OAuth 2.0\nhttps://accounts.google.com/o/oauth2/auth?\n  client_id=CLIENT_ID&\n  redirect_uri=https://app.it/callback&\n  response_type=code&\n  scope=openid%20profile%20email`,
-      autoFetched: false
-    },
-    {
-      term: "CSRF (Cross-Site Request Forgery)",
-      category: "Sicurezza",
-      summary: "Vulnerabilità che induce un browser autenticato a eseguire azioni non autorizzate su un sito web fidato.",
-      detail: "Sfrutta l'invio automatico dei cookie di sessione da parte del browser. Si mitiga utilizzando cookie con attributo `SameSite=Strict` e token CSRF univoci inviati negli header.",
-      code: `<!-- Token CSRF in un form sicuro -->\n<input type="hidden" name="_csrf" value="d98a2f8c09a8fbc897..." />`,
-      autoFetched: false
-    },
-    {
-      term: "Hashing vs Crittografia",
-      category: "Sicurezza",
-      summary: "L'hashing è una trasformazione a senso unico non invertibile; la crittografia è una trasformazione a due vie invertibile con una chiave.",
-      detail: "Le password vanno sempre sottoposte ad hashing con salt (es. bcrypt, Argon2); i dati sensibili da recuperare in chiaro (es. carte di credito) vanno crittografati simmetricamente (es. AES-256-GCM).",
-      code: `// Hashing sicuro password con bcrypt\nconst hash = await bcrypt.hash('MiaPassword123!', 12);\nconst isMatch = await bcrypt.compare('MiaPassword123!', hash);`,
-      autoFetched: false
-    },
-    {
-      term: "Zero Trust Architecture",
-      category: "Sicurezza",
-      summary: "Modello di sicurezza basato sul principio 'Non fidarsi mai, verificare sempre' per qualsiasi richiesta, interna o esterna.",
-      detail: "A differenza del modello tradizionale basato sul perimetro di rete aziendale, nel modello Zero Trust ogni utente, dispositivo e microservizio deve autenticarsi ed essere autorizzato continuamente con privilegi minimi.",
-      code: `[Ogni Richiesta API] ──> [Verifica Identità (MFA)] + [Verifica Salute Device] + [Controllo Policy RBAC]`,
-      autoFetched: false
-    },
-
-    // --- ALGORITMI & STRUTTURE DATI ---
-    {
-      term: "Hash Map / Tabella Hash",
-      category: "Algoritmi",
-      summary: "Struttura dati che associa chiavi a valori calcolando un indice tramite una funzione hash per accessi ultraveloci.",
-      detail: "Garantisce mediamente un tempo di ricerca, inserimento e cancellazione pari a O(1). Gestisce le collisioni tramite concatenamento (chaining) o indirizzamento aperto.",
-      code: `const tachoLookup = new Map();\ntachoLookup.set('AB123CD', { nextCheck: '2026-09-15', status: 'OK' });\nconsole.log(tachoLookup.get('AB123CD')); // Accesso O(1)`,
-      autoFetched: false
-    },
-    {
-      term: "Binary Search (Ricerca Binaria)",
-      category: "Algoritmi",
-      summary: "Algoritmo efficiente per trovare un elemento in un array già ordinato con complessità O(log n).",
-      detail: "Confronta l'elemento cercato con il valore centrale: se non corrisponde, dimezza l'intervallo di ricerca scartando la metà in cui l'elemento non può trovarsi.",
-      code: `function binarySearch(arr, target) {\n  let low = 0, high = arr.length - 1;\n  while (low <= high) {\n    let mid = Math.floor((low + high) / 2);\n    if (arr[mid] === target) return mid;\n    if (arr[mid] < target) low = mid + 1;\n    else high = mid - 1;\n  }\n  return -1;\n}`,
-      autoFetched: false
-    },
-    {
-      term: "Programmazione Dinamica (Memoization)",
-      category: "Algoritmi",
-      summary: "Tecnica algoritmica di ottimizzazione che risolve problemi complessi memorizzando i risultati dei sottoproblemi sovrapposti.",
-      detail: "Evita di ricalcolare più volte le stesse operazioni salvando i risultati parziali in una tabella (approccio Top-Down con cache o Bottom-Up tabellare).",
-      code: `const memo = {};\nfunction fib(n) {\n  if (n <= 1) return n;\n  if (memo[n]) return memo[n];\n  return memo[n] = fib(n - 1) + fib(n - 2); // Salva in cache\n}`,
-      autoFetched: false
-    },
-    {
-      term: "Albero Binario di Ricerca (BST) & B-Tree",
-      category: "Algoritmi",
-      summary: "Strutture dati ad albero in cui ogni nodo segue un ordinamento per consentire ricerche, inserimenti e cancellazioni logaritmiche.",
-      detail: "I B-Tree e i B+ Tree sono generalizzazioni ad albero auto-bilanciante con più chiavi per nodo, ampiamente impiegate dai motori dei database (es. InnoDB, PostgreSQL) per ottimizzare le letture da disco.",
-      code: `// Regola BST: Sinistra < Nodo < Destra\n        [50]\n       /    \\\n     [30]   [70]\n    /   \\   /   \\\n  [20] [40][60] [80]`,
-      autoFetched: false
-    },
-
-    // --- NETWORKING & PROTOCOLLI ---
-    {
-      term: "TCP vs UDP",
-      category: "Networking",
-      summary: "TCP è orientato alla connessione con garanzia di consegna e ordine; UDP è privo di connessione per massima velocità a bassa latenza.",
-      detail: "TCP effettua un 3-way handshake e ritrasmette i pacchetti persi (usato per HTTP, Web, database); UDP trasmette senza conferme (usato per streaming audio/video in diretta, gaming, DNS).",
-      code: `TCP Handshake: [SYN] ──>  [SYN-ACK] <──  [ACK] ──> [Connessione Stabilita]\nUDP:           [Data Packet] ────────────────────> [Nessuna conferma]`,
-      autoFetched: false
-    },
-    {
-      term: "HTTP/2 & HTTP/3",
-      category: "Networking",
-      summary: "Evoluzioni del protocollo HTTP per risolvere i colli di bottiglia di latenza e trasferimento sul web.",
-      detail: "HTTP/2 introduce multiplexing su singola connessione TCP e header compression (HPACK); HTTP/3 sostituisce TCP con il protocollo QUIC basato su UDP, eliminando l'head-of-line blocking causato da pacchetti persi.",
-      code: `HTTP/1.1: Connessione bloccata per ogni risorsa (o max 6 per dominio)\nHTTP/2:   Multiplexing parallelo su 1 singola connessione TCP\nHTTP/3:   QUIC su UDP (Connessione istantanea con 0-RTT handshake)`,
-      autoFetched: false
-    },
-    {
-      term: "WebSocket",
-      category: "Networking",
-      summary: "Protocollo di comunicazione full-duplex bidirezionale persistente su una singola connessione TCP.",
-      detail: "Avvia la connessione con un normale handshake HTTP e la promuove (`Upgrade`), consentendo a client e server di scambiarsi messaggi in tempo reale con overhead minimo (senza inviare continue intestazioni HTTP).",
-      code: `// Client WebSocket\nconst socket = new WebSocket('wss://api.azienda.it/live-fleet');\nsocket.onmessage = (event) => console.log('Posizione aggiornata:', JSON.parse(event.data));\nsocket.send(JSON.stringify({ subscribe: 'VEICOLO_101' }));`,
-      autoFetched: false
-    },
-    {
-      term: "gRPC & Protocol Buffers",
-      category: "Networking",
-      summary: "Framework RPC ad altissime prestazioni sviluppato da Google basato su HTTP/2 e serializzazione binaria.",
-      detail: "Sostituisce il formato JSON con Protocol Buffers (`.proto`), riducendo la dimensione dei payload e generando codice client/server fortemente tipizzato in molteplici linguaggi.",
-      code: `// Definizione .proto\nservice DriverService {\n  rpc GetDriverStatus (DriverRequest) returns (DriverResponse);\n}\nmessage DriverRequest { string driver_id = 1; }`,
-      autoFetched: false
-    },
-
-    // --- TESTING & QUALITÀ ---
-    {
-      term: "Piramide dei Test (Unit, Integration, E2E)",
-      category: "Testing",
-      summary: "Modello strategico che suggerisce di avere molti test unitari veloci, un numero medio di test di integrazione e pochi test End-to-End.",
-      detail: "I test unitari verificano singole funzioni isolate; i test di integrazione validano la comunicazione tra moduli (es. API + DB); i test E2E (es. Playwright, Cypress) simulano l'utente reale nel browser.",
-      code: `      /\\      <-- Test End-to-End (Pochi, Lenti, Costosi)\n     /  \\     \n    /────\\    <-- Test di Integrazione (Medi)\n   /──────\\   <-- Test Unitari (Moltissimi, Istantanei)`,
-      autoFetched: false
-    },
-    {
-      term: "TDD (Test-Driven Development)",
-      category: "Testing",
-      summary: "Metodologia di sviluppo basata sul ciclo iterativo 'Red - Green - Refactor'.",
-      detail: "1. Si scrive prima il test unitario che fallisce (Red); 2. Si scrive il codice minimo per far passare il test (Green); 3. Si ottimizza e pulisce il codice mantenendo il test funzionante (Refactor).",
-      code: `// 1. Scrivi il test prima del codice\ntest('calcolaScadenza28gg aggiunge 28 giorni alla data', () => {\n  const res = calcolaScadenza(new Date('2026-08-01'));\n  expect(res.toISOString().slice(0,10)).toBe('2026-08-29');\n});`,
-      autoFetched: false
-    },
-    {
-      term: "Static Code Analysis (Linting & SAST)",
-      category: "Testing",
-      summary: "Analisi automatica del codice sorgente eseguita senza mandare in esecuzione il programma per scovare bug, falle e violazioni stilistiche.",
-      detail: "Strumenti come ESLint, SonarQube o TypeScript catturano errori di tipo, variabili non utilizzate, vulnerabilità note e complessità ciclomatica prima ancora di fare il commit.",
-      code: `# Esecuzione linter nel terminale\nnpx eslint src/ --fix\nnpx tsc --noEmit # Controllo tipi TypeScript`,
-      autoFetched: false
-    },
-
-    // --- AI, MACHINE LEARNING & DATI ---
-    {
-      term: "RAG (Retrieval-Augmented Generation)",
-      category: "AI & Dati",
-      summary: "Tecnica che potenzia i Large Language Model fornendo loro documenti pertinenti recuperati da un database esterno prima della risposta.",
-      detail: "Risolve il problema delle allucinazioni e l'assenza di dati privati: la domanda dell'utente viene convertita in embedding, vengono estratti i paragrafi più simili dal database vettoriale e iniettati nel contesto del prompt.",
-      code: `[Domanda Utente] ──> [Vector Search DB] ──> [Chunk Rilevanti Documenti]\n                                                  │\n[Prompt: "Rispondi usando solo questi chunk: ..."] ──> [LLM Gemini] ──> [Risposta Accurata]`,
-      autoFetched: false
-    },
-    {
-      term: "Embeddings Vettoriali",
-      category: "AI & Dati",
-      summary: "Rappresentazioni numeriche di testi, immagini o concetti sotto forma di vettori ad alta dimensionalità.",
-      detail: "Permettono di calcolare la somiglianza semantica tra due testi misurando la distanza angolare (Cosine Similarity): concetti con significato affine avranno vettori geometricamente vicini nello spazio.",
-      code: `// Cosine Similarity tra vettori semantici\nfunction cosineSimilarity(vecA, vecB) {\n  const dot = vecA.reduce((sum, val, i) => sum + val * vecB[i], 0);\n  return dot / (Math.hypot(...vecA) * Math.hypot(...vecB));\n}`,
-      autoFetched: false
-    },
-    {
-      term: "Vector Database (Database Vettoriale)",
-      category: "AI & Dati",
-      summary: "Database specializzato nell'indicizzazione e ricerca di vettori numerici ad altissima dimensionalità.",
-      detail: "A differenza dei database tradizionali basati su corrispondenze esatte, utilizza algoritmi ANN (Approximate Nearest Neighbors come HNSW) per trovare i record semanticamente più simili in millisecondi (es. Pinecone, ChromaDB, Milvus, pgvector).",
-      code: `-- Ricerca semantica con pgvector in PostgreSQL\nSELECT id, content FROM knowledge_base \nORDER BY embedding <=> '[0.012, -0.045, 0.881, ...]' LIMIT 5;`,
-      autoFetched: false
-    },
-    {
-      term: "Tokenization & Context Window",
-      category: "AI & Dati",
-      summary: "La tokenizzazione è la divisione del testo in frammenti elementari (token); la Context Window è il numero massimo di token elaborabili dall'AI.",
-      detail: "100 parole corrispondono mediamente a circa 130 token. La finestra di contesto definisce la memoria a breve termine del modello per includere prompt, cronologia conversazionale e documenti allegati.",
-      code: `// Esempio logico di tokenizzazione\n"Ingegneria del software" ──> ["Ingegn", "eria", " del", " software"] (4 token)`,
+      summary: "Approccio in cui un'applicazione è disaccoppiata in una suite di servizi indipendenti, autonomi e comunicanti via rete.",
+      detail: "Ogni microservizio possiede un proprio database dedicato e favorisce il deploy indipendente.",
+      code: `[Client Web/Mobile] ──> [API Gateway] ──> [Auth / Fleet / Billing Services]`,
       autoFetched: false
     }
   ];
@@ -638,7 +292,6 @@
     document.getElementById('settingsPanel').classList.toggle('open');
   }
 
-  // Sincronizzazione della chiave Gemini
   db.ref('settings/gemini_api_key').on('value', (snapshot) => {
     const keyVal = snapshot.val();
     if (keyVal) {
@@ -651,7 +304,6 @@
     }
   });
 
-  // Sincronizzazione termini dal cloud
   db.ref('dev_lexicon_terms').on('value', (snapshot) => {
     const data = snapshot.val();
     if (data) {
@@ -663,22 +315,43 @@
     renderTerms(document.getElementById('searchInput').value);
   });
 
-  // Caricamento del pacchetto di 60+ termini su Firebase
+  // Funzione per importare file JSON direttamente sul Cloud Firebase
+  function importDataToCloud(event) {
+    const file = event.target.files[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = async function(e) {
+      try {
+        const imported = JSON.parse(e.target.result);
+        if (Array.isArray(imported)) {
+          const updates = {};
+          imported.forEach(item => {
+            if (item.term) {
+              const termId = item.term.toLowerCase().replace(/[^a-z0-9]/g, '_');
+              updates[termId] = item;
+            }
+          });
+          await db.ref('dev_lexicon_terms').update(updates);
+          alert(`Importazione completata! ${imported.length} termini caricati su Cloud Firebase.`);
+        } else {
+          alert('Il file JSON non contiene un array valido di termini.');
+        }
+      } catch (err) {
+        alert('Errore durante la lettura del file JSON: ' + err.message);
+      }
+      event.target.value = '';
+    };
+    reader.readAsText(file);
+  }
+
   async function seedDefaultTerms() {
-    if (!confirm(`Vuoi caricare l'enciclopedia tecnica (${initialTermsPack.length} termini approfonditi) sul tuo database Firebase?`)) return;
-    
+    if (!confirm('Vuoi sincronizzare i termini base su Firebase?')) return;
     const updates = {};
     initialTermsPack.forEach(term => {
       const termId = term.term.toLowerCase().replace(/[^a-z0-9]/g, '_');
       updates[termId] = term;
     });
-
-    try {
-      await db.ref('dev_lexicon_terms').update(updates);
-      alert(`Enciclopedia caricata con successo! ${initialTermsPack.length} termini sincronizzati.`);
-    } catch (err) {
-      alert('Errore durante il caricamento: ' + err.message);
-    }
+    await db.ref('dev_lexicon_terms').update(updates);
   }
 
   function saveCloudApiKey() {
