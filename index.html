@@ -3,179 +3,436 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta name="theme-color" content="#38bdf8">
-  <title>DevLexicon - Glossario Tecnico Cloud</title>
+  <meta name="theme-color" content="#0ea5e9">
+  <title>DevLexicon • Enciclopedia Tecnica Cloud</title>
   <link rel="manifest" href="manifest.json">
   
+  <!-- Font Google Plus Jakarta Sans & Fira Code -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500;600&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
   <!-- Firebase SDK -->
   <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-database-compat.js"></script>
 
   <style>
     :root {
-      --bg: #0f172a;
-      --card-bg: #1e293b;
+      --bg: #090d16;
+      --card-bg: rgba(18, 26, 43, 0.75);
+      --card-hover: rgba(26, 38, 64, 0.85);
       --accent: #38bdf8;
-      --accent-hover: #0284c7;
-      --text: #f8fafc;
+      --accent-gradient: linear-gradient(135deg, #38bdf8 0%, #6366f1 100%);
+      --text: #f1f5f9;
       --text-muted: #94a3b8;
-      --border: #334155;
-      --badge: #0369a1;
-      --badge-new: #15803d;
-      --danger: #ef4444;
-      --code-bg: #0b1120;
+      --border: rgba(148, 163, 184, 0.12);
+      --border-focus: rgba(56, 189, 248, 0.5);
+      --badge: rgba(56, 189, 248, 0.15);
+      --badge-text: #38bdf8;
+      --badge-new: rgba(34, 197, 94, 0.15);
+      --badge-new-text: #4ade80;
+      --danger: #f43f5e;
+      --code-bg: #060911;
+      --glow: 0 0 25px rgba(56, 189, 248, 0.15);
     }
 
-    * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', system-ui, sans-serif; }
+    * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Plus Jakarta Sans', system-ui, sans-serif; }
+    
     body { 
       background-color: var(--bg); 
+      background-image: 
+        radial-gradient(at 0% 0%, rgba(56, 189, 248, 0.08) 0px, transparent 50%),
+        radial-gradient(at 100% 100%, rgba(99, 102, 241, 0.08) 0px, transparent 50%);
+      background-attachment: fixed;
       color: var(--text); 
-      padding: 2rem 1rem 1rem 1rem; 
+      padding: 2.5rem 1rem 1.5rem 1rem; 
       display: flex; 
       flex-direction: column; 
       align-items: center; 
       min-height: 100vh; 
     }
-    .container { width: 100%; max-width: 900px; flex: 1; }
+
+    .container { width: 100%; max-width: 950px; flex: 1; }
 
     /* Header */
-    .header-box { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem; }
-    .header-titles h1 { font-size: 2.2rem; color: var(--accent); margin-bottom: 0.2rem; }
+    .header-box { 
+      display: flex; 
+      justify-content: space-between; 
+      align-items: center; 
+      margin-bottom: 2rem; 
+    }
+    .header-titles h1 { 
+      font-size: 2.4rem; 
+      font-weight: 800; 
+      letter-spacing: -0.5px;
+      background: var(--accent-gradient);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      margin-bottom: 0.25rem; 
+    }
     .header-titles p { color: var(--text-muted); font-size: 0.95rem; }
-    .header-actions { display: flex; gap: 0.5rem; }
+    .header-actions { display: flex; gap: 0.6rem; }
 
     .btn-icon {
-      background: var(--card-bg); border: 1px solid var(--border); color: var(--text);
-      font-size: 1.1rem; padding: 0.5rem 0.7rem; border-radius: 8px; cursor: pointer;
-      transition: all 0.2s;
+      background: var(--card-bg); 
+      backdrop-filter: blur(12px);
+      border: 1px solid var(--border); 
+      color: var(--text);
+      font-size: 1.15rem; 
+      padding: 0.6rem 0.8rem; 
+      border-radius: 10px; 
+      cursor: pointer;
+      transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
     }
-    .btn-icon:hover { background: #334155; }
-    .btn-icon.unlocked { border-color: var(--danger); color: var(--danger); background: rgba(239, 68, 68, 0.1); }
+    .btn-icon:hover { 
+      border-color: var(--accent); 
+      box-shadow: var(--glow);
+      transform: translateY(-2px);
+    }
+    .btn-icon.unlocked { 
+      border-color: var(--danger); 
+      color: var(--danger); 
+      background: rgba(244, 63, 94, 0.15); 
+    }
 
     /* Pannello Impostazioni */
     .settings-panel {
-      display: none; background: var(--card-bg); border: 1px solid var(--border);
-      border-radius: 8px; padding: 1rem; margin-bottom: 1.5rem;
+      display: none; 
+      background: var(--card-bg); 
+      backdrop-filter: blur(16px);
+      border: 1px solid var(--border);
+      border-radius: 14px; 
+      padding: 1.25rem; 
+      margin-bottom: 1.5rem;
+      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3);
+      animation: fadeIn 0.3s ease;
     }
     .settings-panel.open { display: block; }
-    .settings-row { display: flex; gap: 0.5rem; align-items: center; margin-top: 0.5rem; }
+    .settings-row { display: flex; gap: 0.6rem; align-items: center; margin-top: 0.6rem; }
     .settings-row input {
-      flex: 1; padding: 0.5rem 0.8rem; border-radius: 6px; border: 1px solid var(--border);
-      background: #0f172a; color: var(--text); outline: none; font-size: 0.9rem;
+      flex: 1; 
+      padding: 0.65rem 1rem; 
+      border-radius: 8px; 
+      border: 1px solid var(--border);
+      background: var(--code-bg); 
+      color: var(--text); 
+      outline: none; 
+      font-size: 0.9rem;
+      transition: border-color 0.2s;
     }
+    .settings-row input:focus { border-color: var(--accent); }
 
-    /* Barra Info Sincronizzazione & Azioni */
+    /* Barra Info Sincronizzazione */
     .tools-bar {
-      display: flex; justify-content: space-between; align-items: center;
-      margin-bottom: 1.5rem; background: rgba(30, 41, 59, 0.5); padding: 0.6rem 1rem;
-      border-radius: 8px; border: 1px solid var(--border); flex-wrap: wrap; gap: 0.5rem;
+      display: flex; 
+      justify-content: space-between; 
+      align-items: center;
+      margin-bottom: 1.5rem; 
+      background: var(--card-bg); 
+      backdrop-filter: blur(16px);
+      padding: 0.75rem 1.25rem;
+      border-radius: 14px; 
+      border: 1px solid var(--border); 
+      flex-wrap: wrap; 
+      gap: 0.8rem;
     }
-    .tools-bar span { font-size: 0.85rem; color: var(--text-muted); }
-    .sync-badge { color: #4ade80; font-size: 0.8rem; font-weight: 600; }
+    .tools-bar span { font-size: 0.88rem; color: var(--text-muted); }
+    .sync-badge { color: #4ade80; font-weight: 700; margin-left: 0.5rem; font-size: 0.82rem; }
     .tools-buttons { display: flex; gap: 0.5rem; flex-wrap: wrap; }
 
     .btn-action {
-      padding: 0.4rem 0.8rem; background: var(--border); color: var(--text); border: none;
-      border-radius: 4px; cursor: pointer; font-size: 0.85rem; transition: background 0.2s;
+      padding: 0.5rem 0.9rem; 
+      background: rgba(255, 255, 255, 0.05); 
+      color: var(--text); 
+      border: 1px solid var(--border);
+      border-radius: 8px; 
+      cursor: pointer; 
+      font-size: 0.85rem; 
+      font-weight: 600;
+      transition: all 0.2s;
     }
-    .btn-action:hover { background: #475569; }
-    .btn-action.btn-seed { background: #0369a1; font-weight: 600; }
-    .btn-action.btn-seed:hover { background: #0284c7; }
-    .btn-action.btn-import { background: #0d9488; font-weight: 600; }
-    .btn-action.btn-import:hover { background: #0f766e; }
+    .btn-action:hover { 
+      background: rgba(255, 255, 255, 0.1); 
+      border-color: rgba(255, 255, 255, 0.25);
+    }
+    .btn-action.btn-import { background: rgba(20, 184, 166, 0.15); border-color: rgba(20, 184, 166, 0.4); color: #2dd4bf; }
+    .btn-action.btn-import:hover { background: rgba(20, 184, 166, 0.25); }
 
     /* Ricerca */
-    .search-box { display: flex; gap: 0.5rem; margin-bottom: 1rem; }
+    .search-box { display: flex; gap: 0.5rem; margin-bottom: 1.25rem; }
     .search-box input {
-      flex: 1; padding: 0.8rem 1rem; border-radius: 8px; border: 1px solid var(--border);
-      background: var(--card-bg); color: var(--text); font-size: 1rem; outline: none;
+      flex: 1; 
+      padding: 0.9rem 1.25rem; 
+      border-radius: 12px; 
+      border: 1px solid var(--border);
+      background: var(--card-bg); 
+      backdrop-filter: blur(12px);
+      color: var(--text); 
+      font-size: 1rem; 
+      outline: none;
+      transition: all 0.25s;
     }
-    .search-box input:focus { border-color: var(--accent); }
+    .search-box input:focus { 
+      border-color: var(--border-focus); 
+      box-shadow: var(--glow);
+    }
 
-    /* Categorie */
+    /* Barra Categorie (Senza Scrollbar visibile) */
     .categories-bar {
-      display: flex; gap: 0.5rem; overflow-x: auto; padding-bottom: 0.8rem; margin-bottom: 1rem;
-      scrollbar-width: thin;
+      display: flex; 
+      gap: 0.6rem; 
+      overflow-x: auto; 
+      padding-bottom: 0.5rem; 
+      margin-bottom: 1.25rem;
+      scrollbar-width: none;
+      -ms-overflow-style: none;
+      -webkit-overflow-scrolling: touch;
+      cursor: grab;
     }
+    .categories-bar::-webkit-scrollbar {
+      display: none;
+    }
+
     .cat-filter-btn {
-      padding: 0.35rem 0.8rem; border-radius: 20px; border: 1px solid var(--border);
-      background: var(--card-bg); color: var(--text-muted); cursor: pointer; font-size: 0.8rem;
-      white-space: nowrap; transition: all 0.2s;
+      padding: 0.45rem 1.1rem; 
+      border-radius: 30px; 
+      border: 1px solid var(--border);
+      background: var(--card-bg); 
+      backdrop-filter: blur(10px);
+      color: var(--text-muted); 
+      cursor: pointer; 
+      font-size: 0.84rem;
+      font-weight: 500;
+      white-space: nowrap; 
+      transition: all 0.2s;
+      user-select: none;
     }
+    .cat-filter-btn:hover { color: var(--text); border-color: rgba(255, 255, 255, 0.3); }
     .cat-filter-btn.active {
-      background: var(--accent); color: var(--bg); border-color: var(--accent); font-weight: 600;
+      background: var(--accent-gradient); 
+      color: #040813; 
+      border-color: transparent; 
+      font-weight: 700;
+      box-shadow: 0 0 15px rgba(56, 189, 248, 0.35);
     }
 
     /* Switch Sintesi / Dettaglio */
-    .view-toggle { display: flex; gap: 0.5rem; margin-bottom: 1.5rem; }
+    .view-toggle { 
+      display: flex; 
+      gap: 0.5rem; 
+      margin-bottom: 1.75rem; 
+      background: rgba(15, 23, 42, 0.6); 
+      padding: 0.3rem; 
+      border-radius: 12px; 
+      border: 1px solid var(--border);
+    }
     .btn-toggle {
-      flex: 1; padding: 0.6rem; border: 1px solid var(--border); background: var(--card-bg);
-      color: var(--text-muted); border-radius: 6px; cursor: pointer; font-weight: 600;
+      flex: 1; 
+      padding: 0.65rem; 
+      border: none;
+      background: transparent;
+      color: var(--text-muted); 
+      border-radius: 9px; 
+      cursor: pointer; 
+      font-weight: 600;
+      font-size: 0.9rem;
       transition: all 0.2s;
     }
-    .btn-toggle.active { background: var(--accent); color: var(--bg); border-color: var(--accent); }
+    .btn-toggle.active { 
+      background: var(--card-bg); 
+      color: var(--accent); 
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25);
+      border: 1px solid var(--border);
+    }
 
-    /* Card Termine */
+    /* Term Card */
     .term-card {
-      background: var(--card-bg); border: 1px solid var(--border); border-radius: 10px;
-      padding: 1.5rem; margin-bottom: 1.2rem;
+      background: var(--card-bg); 
+      backdrop-filter: blur(16px);
+      border: 1px solid var(--border); 
+      border-radius: 16px;
+      padding: 1.75rem; 
+      margin-bottom: 1.25rem;
+      transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+    .term-card:hover {
+      background: var(--card-hover);
+      border-color: rgba(56, 189, 248, 0.3);
+      transform: translateY(-2px);
+      box-shadow: 0 12px 30px rgba(0, 0, 0, 0.35);
     }
     .card-header {
-      display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 0.5rem;
+      display: flex; 
+      justify-content: space-between; 
+      align-items: flex-start; 
+      margin-bottom: 0.75rem;
     }
-    .term-card h2 { color: var(--accent); font-size: 1.3rem; }
+    .term-card h2 { 
+      font-size: 1.35rem; 
+      font-weight: 700;
+      color: #ffffff;
+      letter-spacing: -0.3px;
+    }
 
-    /* Pulsante Cestino Protetto (Nascosto di Default) */
+    /* Pulsante Cestino Protetto */
     .btn-delete {
       display: none;
-      background: rgba(239, 68, 68, 0.15); border: 1px solid var(--danger); color: var(--danger);
-      cursor: pointer; font-size: 0.85rem; padding: 0.3rem 0.6rem; border-radius: 6px;
-      font-weight: 600; transition: all 0.2s;
+      background: rgba(244, 63, 94, 0.15); 
+      border: 1px solid rgba(244, 63, 94, 0.4); 
+      color: var(--danger);
+      cursor: pointer; 
+      font-size: 0.8rem; 
+      padding: 0.35rem 0.75rem; 
+      border-radius: 8px;
+      font-weight: 600; 
+      transition: all 0.2s;
     }
     .btn-delete:hover { background: var(--danger); color: white; }
     body.edit-mode .btn-delete { display: inline-flex; align-items: center; gap: 0.3rem; }
 
-    .badge-group { display: flex; gap: 0.5rem; margin-bottom: 0.8rem; }
+    /* Badge */
+    .badge-group { display: flex; gap: 0.5rem; margin-bottom: 1rem; }
     .category-badge {
-      display: inline-block; font-size: 0.75rem; background: var(--badge); color: white;
-      padding: 0.2rem 0.6rem; border-radius: 4px; text-transform: uppercase; font-weight: 600;
+      font-size: 0.72rem; 
+      background: var(--badge); 
+      color: var(--badge-text);
+      padding: 0.25rem 0.65rem; 
+      border-radius: 6px; 
+      text-transform: uppercase; 
+      font-weight: 700;
+      letter-spacing: 0.5px;
     }
     .new-badge {
-      display: inline-block; font-size: 0.75rem; background: var(--badge-new); color: white;
-      padding: 0.2rem 0.6rem; border-radius: 4px; text-transform: uppercase; font-weight: 600;
+      font-size: 0.72rem; 
+      background: var(--badge-new); 
+      color: var(--badge-new-text);
+      padding: 0.25rem 0.65rem; 
+      border-radius: 6px; 
+      text-transform: uppercase; 
+      font-weight: 700;
+      letter-spacing: 0.5px;
     }
-    .text-content { line-height: 1.6; color: var(--text); }
+
+    .text-content { 
+      line-height: 1.7; 
+      color: #cbd5e1; 
+      font-size: 0.96rem;
+    }
 
     /* Code Block */
     .code-block {
-      margin-top: 1rem; background: var(--code-bg); border: 1px solid var(--border);
-      border-radius: 6px; padding: 1rem; overflow-x: auto;
+      margin-top: 1.25rem; 
+      background: var(--code-bg); 
+      border: 1px solid var(--border);
+      border-radius: 10px; 
+      position: relative;
+      overflow: hidden;
     }
-    .code-header { font-size: 0.75rem; color: var(--text-muted); text-transform: uppercase; margin-bottom: 0.5rem; font-weight: 700; }
-    pre code { font-family: 'Consolas', 'Fira Code', monospace; font-size: 0.88rem; color: #38bdf8; white-space: pre-wrap; word-break: break-word; }
+    .code-header { 
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      background: rgba(255, 255, 255, 0.03);
+      padding: 0.5rem 1rem;
+      border-bottom: 1px solid var(--border);
+      font-size: 0.75rem; 
+      color: var(--text-muted); 
+      text-transform: uppercase; 
+      font-weight: 700; 
+      letter-spacing: 0.5px;
+    }
+    .btn-copy {
+      background: transparent;
+      border: none;
+      color: var(--accent);
+      cursor: pointer;
+      font-size: 0.75rem;
+      font-weight: 600;
+      padding: 0.2rem 0.5rem;
+      border-radius: 4px;
+      transition: background 0.2s;
+    }
+    .btn-copy:hover { background: rgba(56, 189, 248, 0.15); }
+    pre { padding: 1.1rem; overflow-x: auto; margin: 0; }
+    pre code { 
+      font-family: 'Fira Code', monospace; 
+      font-size: 0.88rem; 
+      color: #7dd3fc; 
+      white-space: pre-wrap; 
+      word-break: break-word; 
+      line-height: 1.5;
+    }
+
+    /* Box Suggerimento / Forse cercavi */
+    .did-you-mean-box {
+      background: rgba(56, 189, 248, 0.1);
+      border: 1px solid rgba(56, 189, 248, 0.3);
+      border-radius: 12px;
+      padding: 0.9rem 1.25rem;
+      margin-bottom: 1.25rem;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      font-size: 0.92rem;
+      color: #94a3b8;
+    }
+    .did-you-mean-link {
+      color: var(--accent);
+      font-weight: 700;
+      text-decoration: underline;
+      cursor: pointer;
+    }
+    .did-you-mean-link:hover { color: #ffffff; }
 
     /* Not Found */
     .not-found-box {
-      text-align: center; background: var(--card-bg); border: 1px dashed var(--border);
-      border-radius: 10px; padding: 2.5rem 1.5rem; margin-top: 1rem;
+      text-align: center; 
+      background: var(--card-bg); 
+      backdrop-filter: blur(16px);
+      border: 1px dashed var(--border);
+      border-radius: 16px; 
+      padding: 3rem 1.5rem; 
+      margin-top: 1rem;
     }
     .btn-search-web {
-      margin-top: 1rem; padding: 0.7rem 1.2rem; background: var(--accent);
-      color: var(--bg); border: none; border-radius: 6px; font-weight: 700;
-      cursor: pointer; transition: background 0.2s;
+      margin-top: 1.25rem; 
+      padding: 0.8rem 1.5rem; 
+      background: var(--accent-gradient);
+      color: #040813; 
+      border: none; 
+      border-radius: 10px; 
+      font-weight: 700;
+      font-size: 0.95rem;
+      cursor: pointer; 
+      transition: all 0.25s;
+      box-shadow: 0 4px 15px rgba(56, 189, 248, 0.3);
     }
-    .btn-search-web:hover { background: var(--accent-hover); }
-    .spinner { display: inline-block; margin-top: 1rem; color: var(--accent); font-weight: 600; }
+    .btn-search-web:hover { 
+      transform: translateY(-2px);
+      box-shadow: 0 6px 20px rgba(56, 189, 248, 0.45);
+    }
+    .spinner { display: inline-block; margin-top: 1.25rem; color: var(--accent); font-weight: 600; }
 
     /* Footer */
     footer {
-      margin-top: 3rem; padding: 1.5rem 0 1rem 0; text-align: center;
-      border-top: 1px solid rgba(51, 65, 85, 0.6); width: 100%; max-width: 900px;
+      margin-top: 3.5rem; 
+      padding: 1.75rem 0 1rem 0; 
+      text-align: center;
+      border-top: 1px solid var(--border); 
+      width: 100%; 
+      max-width: 950px;
     }
-    .brand-attribution { font-size: 0.88rem; color: var(--text-muted); letter-spacing: 0.5px; margin-bottom: 0.35rem; }
-    .brand-highlight { color: var(--accent); font-weight: 700; }
-    .brand-author { color: #e2e8f0; font-weight: 600; }
-    .brand-rights { font-size: 0.75rem; color: #64748b; }
+    .brand-attribution { 
+      font-size: 0.9rem; 
+      color: var(--text-muted); 
+      letter-spacing: 0.4px; 
+      margin-bottom: 0.4rem; 
+    }
+    .brand-highlight { color: var(--accent); font-weight: 800; }
+    .brand-author { color: #f8fafc; font-weight: 600; }
+    .brand-rights { font-size: 0.78rem; color: #64748b; }
+
+    @keyframes fadeIn { from { opacity: 0; transform: translateY(-5px); } to { opacity: 1; transform: translateY(0); } }
   </style>
 </head>
 <body>
@@ -184,7 +441,7 @@
   <div class="header-box">
     <div class="header-titles">
       <h1>DevLexicon</h1>
-      <p>Enciclopedia Tecnica Cloud con Sincronizzazione e Auto-Apprendimento AI</p>
+      <p>Enciclopedia Tecnica Cloud &amp; Auto-Apprendimento AI</p>
     </div>
     <div class="header-actions">
       <button class="btn-icon" id="btnLock" title="Sblocca/Blocca eliminazione schede" onclick="toggleEditMode()">🔒</button>
@@ -197,14 +454,14 @@
     <label style="font-size: 0.85rem; color: var(--text-muted);">Chiave Gemini Cloud (Sincronizzata su tutti i dispositivi):</label>
     <div class="settings-row">
       <input type="password" id="apiKeyInput" placeholder="Inserisci chiave Gemini...">
-      <button class="btn-action" onclick="saveCloudApiKey()">Salva</button>
+      <button class="btn-action" onclick="saveCloudApiKey()">Salva su Cloud</button>
     </div>
   </div>
 
   <!-- Barra Info, Import & Backup -->
   <div class="tools-bar">
     <div>
-      <span id="termCount">Caricamento dal cloud...</span>
+      <span id="termCount">Caricamento in corso...</span>
       <span class="sync-badge" id="syncStatus"> ● Cloud Connesso</span>
     </div>
     <div class="tools-buttons">
@@ -214,9 +471,9 @@
     </div>
   </div>
 
-  <!-- Barra Ricerca -->
+  <!-- Ricerca con Tolleranza Errori e Priorità di Rilevanza -->
   <div class="search-box">
-    <input type="text" id="searchInput" placeholder="Cerca un concetto tecnico...">
+    <input type="text" id="searchInput" placeholder="Cerca tra oltre 100 concetti (es. Docker, Sharding, CORS, RAG, Event Loop)...">
   </div>
 
   <!-- Categorie Dinamiche -->
@@ -227,6 +484,9 @@
     <button class="btn-toggle active" id="btnSummary" onclick="setViewMode('summary')">Modalità Sintetica</button>
     <button class="btn-toggle" id="btnDetail" onclick="setViewMode('detail')">Modalità Dettagliata (con Codice)</button>
   </div>
+
+  <!-- Contenitore Suggerimento "Forse cercavi" -->
+  <div id="didYouMeanContainer"></div>
 
   <!-- Risultati -->
   <div id="termsList"></div>
@@ -270,7 +530,53 @@
   let selectedCategory = 'ALL';
   let isEditMode = false;
 
-  // Attivazione/Disattivazione Sicura Modalità Eliminazione
+  // Scroll orizzontale categorie con rotellina mouse
+  const categoriesBarElement = document.getElementById('categoriesBar');
+  categoriesBarElement.addEventListener('wheel', (e) => {
+    if (e.deltaY !== 0) {
+      e.preventDefault();
+      categoriesBarElement.scrollLeft += e.deltaY;
+    }
+  }, { passive: false });
+
+  // Algoritmo Levenshtein per Fuzzy Match
+  function getLevenshteinDistance(a, b) {
+    const matrix = Array.from({ length: a.length + 1 }, () => Array(b.length + 1).fill(0));
+    for (let i = 0; i <= a.length; i++) matrix[i][0] = i;
+    for (let j = 0; j <= b.length; j++) matrix[0][j] = j;
+
+    for (let i = 1; i <= a.length; i++) {
+      for (let j = 1; j <= b.length; j++) {
+        const cost = a[i - 1] === b[j - 1] ? 0 : 1;
+        matrix[i][j] = Math.min(
+          matrix[i - 1][j] + 1,
+          matrix[i][j - 1] + 1,
+          matrix[i - 1][j - 1] + cost
+        );
+      }
+    }
+    return matrix[a.length][b.length];
+  }
+
+  function fuzzyMatch(query, target) {
+    const q = query.toLowerCase();
+    const t = target.toLowerCase();
+    if (t.includes(q)) return 1.0;
+
+    const words = t.split(/[\s\-()/,]+/);
+    let bestScore = 0;
+
+    for (const word of words) {
+      if (!word) continue;
+      const dist = getLevenshteinDistance(q, word);
+      const maxLen = Math.max(q.length, word.length);
+      const similarity = 1 - dist / maxLen;
+      if (similarity > bestScore) bestScore = similarity;
+    }
+
+    return bestScore;
+  }
+
   function toggleEditMode() {
     isEditMode = !isEditMode;
     document.body.classList.toggle('edit-mode', isEditMode);
@@ -278,11 +584,11 @@
     if (isEditMode) {
       lockBtn.textContent = '🔓';
       lockBtn.classList.add('unlocked');
-      lockBtn.title = 'Modalità modifica attiva: i cestini sono visibili. Clicca per bloccare.';
+      lockBtn.title = 'Modalità modifica attiva: i cestini sono visibili.';
     } else {
       lockBtn.textContent = '🔒';
       lockBtn.classList.remove('unlocked');
-      lockBtn.title = 'Modalità protetta: i cestini sono nascosti. Clicca per sbloccare.';
+      lockBtn.title = 'Modalità protetta: i cestini sono nascosti.';
     }
   }
 
@@ -329,12 +635,10 @@
             }
           });
           await db.ref('dev_lexicon_terms').update(updates);
-          alert(`Importazione completata! ${imported.length} termini caricati su Cloud Firebase.`);
-        } else {
-          alert('Il file JSON non contiene un array valido di termini.');
+          alert(`Importazione completata! ${imported.length} termini sincronizzati.`);
         }
       } catch (err) {
-        alert('Errore durante la lettura del file JSON: ' + err.message);
+        alert('Errore: ' + err.message);
       }
       event.target.value = '';
     };
@@ -366,10 +670,9 @@
   }
 
   function renderCategories() {
-    const catBar = document.getElementById('categoriesBar');
     const categories = ['ALL', ...new Set(glossary.map(item => item.category || 'Generale'))];
     
-    catBar.innerHTML = categories.map(cat => `
+    categoriesBarElement.innerHTML = categories.map(cat => `
       <button class="cat-filter-btn ${selectedCategory === cat ? 'active' : ''}" 
               onclick="setCategory('${escapeHtml(cat)}')">
         ${cat === 'ALL' ? 'Tutte le Categorie' : escapeHtml(cat)}
@@ -377,12 +680,24 @@
     `).join('');
   }
 
-  // Eliminazione sicura con conferma esplicita
   function deleteTerm(fbKey, termName) {
-    const conf = confirm(`ATTENZIONE:\nVuoi eliminare definitivamente "${termName}" dal database cloud?\n\nQuesta operazione non può essere annullata.`);
-    if (conf) {
+    if (confirm(`Vuoi eliminare definitivamente "${termName}" dal database cloud?`)) {
       db.ref('dev_lexicon_terms/' + fbKey).remove();
     }
+  }
+
+  function copyCode(btn, codeText) {
+    navigator.clipboard.writeText(decodeURIComponent(codeText)).then(() => {
+      const originalText = btn.textContent;
+      btn.textContent = '✓ Copiato!';
+      setTimeout(() => btn.textContent = originalText, 2000);
+    });
+  }
+
+  function selectSuggestion(suggestedTerm) {
+    const searchInput = document.getElementById('searchInput');
+    searchInput.value = suggestedTerm;
+    renderTerms(suggestedTerm);
   }
 
   function exportData() {
@@ -395,37 +710,95 @@
     a.remove();
   }
 
+  // Funzione di ricerca con Ranking di Rilevanza e Tolleranza Errori
   function renderTerms(query = '') {
     const listContainer = document.getElementById('termsList');
+    const didYouMeanContainer = document.getElementById('didYouMeanContainer');
     const cleanQuery = query.trim().toLowerCase();
-    document.getElementById('termCount').innerText = `${glossary.length} termini memorizzati`;
+    
+    document.getElementById('termCount').innerText = `${glossary.length} concetti memorizzati`;
+    didYouMeanContainer.innerHTML = '';
 
-    let filtered = glossary.filter(item => {
-      const matchQuery = item.term.toLowerCase().includes(cleanQuery) || 
-                         (item.category && item.category.toLowerCase().includes(cleanQuery)) ||
-                         (item.summary && item.summary.toLowerCase().includes(cleanQuery));
-      const matchCat = (selectedCategory === 'ALL' || item.category === selectedCategory);
-      return matchQuery && matchCat;
-    });
+    let categoryPool = glossary.filter(item => selectedCategory === 'ALL' || item.category === selectedCategory);
 
-    if (filtered.length === 0 && cleanQuery.length > 0) {
-      listContainer.innerHTML = `
-        <div class="not-found-box">
-          <p>Il termine "<strong>${escapeHtml(query)}</strong>" non è presente nell'enciclopedia.</p>
-          <button class="btn-search-web" onclick="fetchTermFromWeb('${escapeHtml(query)}')">
-            🔍 Cerca e Genera Scheda Tecnica con AI
-          </button>
-          <div id="fetchLoader"></div>
-        </div>
-      `;
+    if (cleanQuery.length === 0) {
+      renderCards(categoryPool);
       return;
     }
 
-    listContainer.innerHTML = filtered.map(item => `
+    let scoredItems = [];
+
+    categoryPool.forEach(item => {
+      const termTitle = item.term.toLowerCase();
+      const termCategory = (item.category || '').toLowerCase();
+      const termSummary = (item.summary || '').toLowerCase();
+      const termDetail = (item.detail || '').toLowerCase();
+
+      let score = 0;
+
+      // Match con priorità ponderata
+      if (termTitle === cleanQuery) {
+        score += 100;
+      } else if (termTitle.startsWith(cleanQuery)) {
+        score += 80;
+      } else if (termTitle.includes(cleanQuery)) {
+        score += 50;
+      } else if (termCategory.includes(cleanQuery)) {
+        score += 30;
+      } else if (termSummary.includes(cleanQuery)) {
+        score += 10;
+      } else if (termDetail.includes(cleanQuery)) {
+        score += 5;
+      } else {
+        const fuzzyScore = Math.max(
+          fuzzyMatch(cleanQuery, item.term) * 40,
+          fuzzyMatch(cleanQuery, item.summary || '') * 8
+        );
+        if (fuzzyScore >= 20) {
+          score = fuzzyScore;
+        }
+      }
+
+      if (score > 0) {
+        scoredItems.push({ item, score });
+      }
+    });
+
+    // Ordina i risultati per punteggio decrescente
+    scoredItems.sort((a, b) => b.score - a.score);
+
+    if (scoredItems.length > 0) {
+      if (scoredItems[0].score < 45 && !scoredItems[0].item.term.toLowerCase().includes(cleanQuery)) {
+        const bestMatch = scoredItems[0].item.term;
+        didYouMeanContainer.innerHTML = `
+          <div class="did-you-mean-box">
+            <span>🔍 Nessun risultato esatto per "<strong>${escapeHtml(query)}</strong>". Forse cercavi:</span>
+            <span class="did-you-mean-link" onclick="selectSuggestion('${escapeHtml(bestMatch)}')">${escapeHtml(bestMatch)}</span>?
+          </div>
+        `;
+      }
+      renderCards(scoredItems.map(s => s.item));
+      return;
+    }
+
+    listContainer.innerHTML = `
+      <div class="not-found-box">
+        <p>Il termine "<strong>${escapeHtml(query)}</strong>" non è presente nell'enciclopedia.</p>
+        <button class="btn-search-web" onclick="fetchTermFromWeb('${escapeHtml(query)}')">
+          ⚡ Genera Scheda Tecnica con AI
+        </button>
+        <div id="fetchLoader"></div>
+      </div>
+    `;
+  }
+
+  function renderCards(items) {
+    const listContainer = document.getElementById('termsList');
+    listContainer.innerHTML = items.map(item => `
       <div class="term-card">
         <div class="card-header">
           <h2>${escapeHtml(item.term)}</h2>
-          <button class="btn-delete" title="Elimina dal Cloud" onclick="deleteTerm('${item._fbKey}', '${escapeHtml(item.term)}')">
+          <button class="btn-delete" onclick="deleteTerm('${item._fbKey}', '${escapeHtml(item.term)}')">
             🗑️ Elimina
           </button>
         </div>
@@ -438,7 +811,10 @@
         </p>
         ${currentMode === 'detail' && item.code ? `
           <div class="code-block">
-            <div class="code-header">Snippet / Esempio Pratico:</div>
+            <div class="code-header">
+              <span>Snippet / Esempio Pratico</span>
+              <button class="btn-copy" onclick="copyCode(this, '${encodeURIComponent(item.code)}')">Copia Codice</button>
+            </div>
             <pre><code>${escapeHtml(item.code)}</code></pre>
           </div>
         ` : ''}
@@ -455,7 +831,7 @@
       return;
     }
 
-    loader.innerHTML = `<span class="spinner">Interrogazione AI e compilazione scheda tecnica in corso...</span>`;
+    loader.innerHTML = `<span class="spinner">⚡ Interrogazione AI e generazione scheda tecnica...</span>`;
 
     const prompt = `Fornisci una scheda tecnica esaustiva sul seguente concetto di sviluppo software: "${searchTerm}".
 Rispondi RIGOROSAMENTE ed ESCLUSIVAMENTE con un JSON valido (senza blocchi markdown \`\`\`json):
