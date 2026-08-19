@@ -61,6 +61,12 @@
       align-items: center; 
       margin-bottom: 2rem; 
     }
+    .title-row {
+      display: flex;
+      align-items: center;
+      gap: 0.6rem;
+      margin-bottom: 0.25rem;
+    }
     .header-titles h1 { 
       font-size: 2.4rem; 
       font-weight: 800; 
@@ -68,7 +74,17 @@
       background: var(--accent-gradient);
       -webkit-background-clip: text;
       -webkit-text-fill-color: transparent;
-      margin-bottom: 0.25rem; 
+      line-height: 1.1;
+    }
+    .version-pill {
+      font-size: 0.72rem;
+      font-weight: 700;
+      background: rgba(56, 189, 248, 0.15);
+      color: var(--accent);
+      border: 1px solid rgba(56, 189, 248, 0.35);
+      padding: 0.2rem 0.55rem;
+      border-radius: 20px;
+      letter-spacing: 0.5px;
     }
     .header-titles p { color: var(--text-muted); font-size: 0.95rem; }
     .header-actions { display: flex; gap: 0.6rem; }
@@ -177,7 +193,7 @@
       box-shadow: var(--glow);
     }
 
-    /* Barra Categorie (Senza Scrollbar visibile) */
+    /* Barra Categorie */
     .categories-bar {
       display: flex; 
       gap: 0.6rem; 
@@ -244,6 +260,28 @@
       box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25);
       border: 1px solid var(--border);
     }
+
+    /* Box Suggerimento "Forse cercavi" */
+    .did-you-mean-box {
+      background: rgba(56, 189, 248, 0.12);
+      border: 1px solid rgba(56, 189, 248, 0.4);
+      border-radius: 12px;
+      padding: 0.9rem 1.25rem;
+      margin-bottom: 1.25rem;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      font-size: 0.95rem;
+      color: #cbd5e1;
+      animation: fadeIn 0.2s ease;
+    }
+    .did-you-mean-link {
+      color: var(--accent);
+      font-weight: 700;
+      text-decoration: underline;
+      cursor: pointer;
+    }
+    .did-you-mean-link:hover { color: #ffffff; }
 
     /* Term Card */
     .term-card {
@@ -319,6 +357,70 @@
       font-size: 0.96rem;
     }
 
+    /* Box: Scenario Applicativo Reale */
+    .usecase-box {
+      margin-top: 1.25rem;
+      background: rgba(15, 23, 42, 0.65);
+      border: 1px solid var(--border);
+      border-left: 3px solid var(--accent);
+      border-radius: 10px;
+      padding: 1rem 1.2rem;
+    }
+    .usecase-header {
+      font-size: 0.8rem;
+      font-weight: 700;
+      color: var(--accent);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      margin-bottom: 0.4rem;
+      display: flex;
+      align-items: center;
+      gap: 0.4rem;
+    }
+    .usecase-text {
+      font-size: 0.92rem;
+      color: #e2e8f0;
+      line-height: 1.6;
+    }
+
+    /* Blocco: Quando Usarlo vs Quando Evitarlo */
+    .pros-cons-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 0.75rem;
+      margin-top: 1rem;
+    }
+    @media (max-width: 600px) {
+      .pros-cons-grid { grid-template-columns: 1fr; }
+    }
+    .pill-card {
+      padding: 0.75rem 1rem;
+      border-radius: 10px;
+      font-size: 0.88rem;
+      line-height: 1.5;
+    }
+    .pill-card.when-to-use {
+      background: rgba(34, 197, 94, 0.08);
+      border: 1px solid rgba(34, 197, 94, 0.25);
+      color: #bbf7d0;
+    }
+    .pill-card.when-to-avoid {
+      background: rgba(244, 63, 94, 0.08);
+      border: 1px solid rgba(244, 63, 94, 0.25);
+      color: #fecdd3;
+    }
+    .pill-card-title {
+      font-size: 0.75rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      margin-bottom: 0.25rem;
+      display: flex;
+      align-items: center;
+      gap: 0.35rem;
+    }
+    .pill-card.when-to-use .pill-card-title { color: #4ade80; }
+    .pill-card.when-to-avoid .pill-card-title { color: #fb7185; }
+
     /* Code Block */
     .code-block {
       margin-top: 1.25rem; 
@@ -363,28 +465,7 @@
       line-height: 1.5;
     }
 
-    /* Box Suggerimento / Forse cercavi */
-    .did-you-mean-box {
-      background: rgba(56, 189, 248, 0.1);
-      border: 1px solid rgba(56, 189, 248, 0.3);
-      border-radius: 12px;
-      padding: 0.9rem 1.25rem;
-      margin-bottom: 1.25rem;
-      display: flex;
-      align-items: center;
-      gap: 0.5rem;
-      font-size: 0.92rem;
-      color: #94a3b8;
-    }
-    .did-you-mean-link {
-      color: var(--accent);
-      font-weight: 700;
-      text-decoration: underline;
-      cursor: pointer;
-    }
-    .did-you-mean-link:hover { color: #ffffff; }
-
-    /* Not Found */
+    /* Not Found Box & Error Notices */
     .not-found-box {
       text-align: center; 
       background: var(--card-bg); 
@@ -407,11 +488,29 @@
       transition: all 0.25s;
       box-shadow: 0 4px 15px rgba(56, 189, 248, 0.3);
     }
-    .btn-search-web:hover { 
+    .btn-search-web:hover:not(:disabled) { 
       transform: translateY(-2px);
       box-shadow: 0 6px 20px rgba(56, 189, 248, 0.45);
     }
+    .btn-search-web:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+      transform: none;
+      box-shadow: none;
+    }
     .spinner { display: inline-block; margin-top: 1.25rem; color: var(--accent); font-weight: 600; }
+    .quota-box {
+      margin-top: 1.25rem;
+      background: rgba(251, 191, 36, 0.12);
+      border: 1px solid rgba(251, 191, 36, 0.35);
+      border-radius: 10px;
+      padding: 0.9rem 1.2rem;
+      color: #fde68a;
+      font-size: 0.92rem;
+      line-height: 1.5;
+      display: inline-block;
+      max-width: 600px;
+    }
 
     /* Footer */
     footer {
@@ -431,6 +530,7 @@
     .brand-highlight { color: var(--accent); font-weight: 800; }
     .brand-author { color: #f8fafc; font-weight: 600; }
     .brand-rights { font-size: 0.78rem; color: #64748b; }
+    .footer-version { color: var(--accent); font-weight: 600; margin-left: 0.35rem; }
 
     @keyframes fadeIn { from { opacity: 0; transform: translateY(-5px); } to { opacity: 1; transform: translateY(0); } }
   </style>
@@ -440,7 +540,10 @@
 <div class="container">
   <div class="header-box">
     <div class="header-titles">
-      <h1>DevLexicon</h1>
+      <div class="title-row">
+        <h1>DevLexicon</h1>
+        <span class="version-pill">v2.0.0</span>
+      </div>
       <p>Enciclopedia Tecnica Cloud &amp; Auto-Apprendimento AI</p>
     </div>
     <div class="header-actions">
@@ -471,7 +574,7 @@
     </div>
   </div>
 
-  <!-- Ricerca con Tolleranza Errori e Priorità di Rilevanza -->
+  <!-- Ricerca -->
   <div class="search-box">
     <input type="text" id="searchInput" placeholder="Cerca tra oltre 100 concetti (es. Docker, Sharding, CORS, RAG, Event Loop)...">
   </div>
@@ -482,10 +585,10 @@
   <!-- Switch Modalità -->
   <div class="view-toggle">
     <button class="btn-toggle active" id="btnSummary" onclick="setViewMode('summary')">Modalità Sintetica</button>
-    <button class="btn-toggle" id="btnDetail" onclick="setViewMode('detail')">Modalità Dettagliata (con Codice)</button>
+    <button class="btn-toggle" id="btnDetail" onclick="setViewMode('detail')">Modalità Dettagliata (con Codice &amp; Scenari)</button>
   </div>
 
-  <!-- Contenitore Suggerimento "Forse cercavi" -->
+  <!-- Suggerimento "Forse cercavi" -->
   <div id="didYouMeanContainer"></div>
 
   <!-- Risultati -->
@@ -498,7 +601,7 @@
     Software Engineered &amp; Designed by: <span class="brand-highlight">GC CodeLab</span> • <span class="brand-author">Giovanni Cavallo</span>
   </div>
   <div class="brand-rights">
-    © <span id="currentYear"></span> DevLexicon • Tutti i diritti riservati
+    © <span id="currentYear"></span> DevLexicon • Tutti i diritti riservati • <span class="footer-version">v2.0.0 Pro</span>
   </div>
 </footer>
 
@@ -529,6 +632,7 @@
   let currentMode = 'summary';
   let selectedCategory = 'ALL';
   let isEditMode = false;
+  let retryCountdownTimer = null;
 
   // Scroll orizzontale categorie con rotellina mouse
   const categoriesBarElement = document.getElementById('categoriesBar');
@@ -539,7 +643,7 @@
     }
   }, { passive: false });
 
-  // Algoritmo Levenshtein per Fuzzy Match
+  // Algoritmo di Levenshtein per Fuzzy Match
   function getLevenshteinDistance(a, b) {
     const matrix = Array.from({ length: a.length + 1 }, () => Array(b.length + 1).fill(0));
     for (let i = 0; i <= a.length; i++) matrix[i][0] = i;
@@ -558,7 +662,7 @@
     return matrix[a.length][b.length];
   }
 
-  function fuzzyMatch(query, target) {
+  function fuzzySimilarity(query, target) {
     const q = query.toLowerCase();
     const t = target.toLowerCase();
     if (t.includes(q)) return 1.0;
@@ -710,7 +814,7 @@
     a.remove();
   }
 
-  // Funzione di ricerca con Ranking di Rilevanza e Tolleranza Errori
+  // Motore di Ricerca con Ranking
   function renderTerms(query = '') {
     const listContainer = document.getElementById('termsList');
     const didYouMeanContainer = document.getElementById('didYouMeanContainer');
@@ -726,7 +830,8 @@
       return;
     }
 
-    let scoredItems = [];
+    let exactMatches = [];
+    let fuzzyMatches = [];
 
     categoryPool.forEach(item => {
       const termTitle = item.term.toLowerCase();
@@ -734,57 +839,50 @@
       const termSummary = (item.summary || '').toLowerCase();
       const termDetail = (item.detail || '').toLowerCase();
 
-      let score = 0;
-
-      // Match con priorità ponderata
       if (termTitle === cleanQuery) {
-        score += 100;
+        exactMatches.push({ item, score: 100 });
       } else if (termTitle.startsWith(cleanQuery)) {
-        score += 80;
+        exactMatches.push({ item, score: 80 });
       } else if (termTitle.includes(cleanQuery)) {
-        score += 50;
+        exactMatches.push({ item, score: 60 });
       } else if (termCategory.includes(cleanQuery)) {
-        score += 30;
+        exactMatches.push({ item, score: 40 });
       } else if (termSummary.includes(cleanQuery)) {
-        score += 10;
+        exactMatches.push({ item, score: 20 });
       } else if (termDetail.includes(cleanQuery)) {
-        score += 5;
+        exactMatches.push({ item, score: 10 });
       } else {
-        const fuzzyScore = Math.max(
-          fuzzyMatch(cleanQuery, item.term) * 40,
-          fuzzyMatch(cleanQuery, item.summary || '') * 8
-        );
-        if (fuzzyScore >= 20) {
-          score = fuzzyScore;
+        const sim = fuzzySimilarity(cleanQuery, item.term);
+        if (sim >= 0.58) {
+          fuzzyMatches.push({ item, score: sim * 100 });
         }
-      }
-
-      if (score > 0) {
-        scoredItems.push({ item, score });
       }
     });
 
-    // Ordina i risultati per punteggio decrescente
-    scoredItems.sort((a, b) => b.score - a.score);
+    if (exactMatches.length > 0) {
+      exactMatches.sort((a, b) => b.score - a.score);
+      renderCards(exactMatches.map(m => m.item));
+      return;
+    }
 
-    if (scoredItems.length > 0) {
-      if (scoredItems[0].score < 45 && !scoredItems[0].item.term.toLowerCase().includes(cleanQuery)) {
-        const bestMatch = scoredItems[0].item.term;
-        didYouMeanContainer.innerHTML = `
-          <div class="did-you-mean-box">
-            <span>🔍 Nessun risultato esatto per "<strong>${escapeHtml(query)}</strong>". Forse cercavi:</span>
-            <span class="did-you-mean-link" onclick="selectSuggestion('${escapeHtml(bestMatch)}')">${escapeHtml(bestMatch)}</span>?
-          </div>
-        `;
-      }
-      renderCards(scoredItems.map(s => s.item));
+    if (fuzzyMatches.length > 0) {
+      fuzzyMatches.sort((a, b) => b.score - a.score);
+      const bestSuggestion = fuzzyMatches[0].item.term;
+
+      didYouMeanContainer.innerHTML = `
+        <div class="did-you-mean-box">
+          <span>🔍 Nessun risultato esatto per "<strong>${escapeHtml(query)}</strong>". Forse cercavi:</span>
+          <span class="did-you-mean-link" onclick="selectSuggestion('${escapeHtml(bestSuggestion)}')">${escapeHtml(bestSuggestion)}</span>?
+        </div>
+      `;
+      renderCards(fuzzyMatches.map(m => m.item));
       return;
     }
 
     listContainer.innerHTML = `
       <div class="not-found-box">
         <p>Il termine "<strong>${escapeHtml(query)}</strong>" non è presente nell'enciclopedia.</p>
-        <button class="btn-search-web" onclick="fetchTermFromWeb('${escapeHtml(query)}')">
+        <button class="btn-search-web" id="btnGenerateAI" onclick="fetchTermFromWeb('${escapeHtml(query)}')">
           ⚡ Genera Scheda Tecnica con AI
         </button>
         <div id="fetchLoader"></div>
@@ -792,6 +890,7 @@
     `;
   }
 
+  // Renderizzazione Card
   function renderCards(items) {
     const listContainer = document.getElementById('termsList');
     listContainer.innerHTML = items.map(item => `
@@ -806,41 +905,75 @@
           <span class="category-badge">${escapeHtml(item.category || 'Generale')}</span>
           ${item.autoFetched ? '<span class="new-badge">Generato con AI</span>' : ''}
         </div>
+        
         <p class="text-content">
           ${escapeHtml(currentMode === 'summary' ? item.summary : item.detail)}
         </p>
-        ${currentMode === 'detail' && item.code ? `
-          <div class="code-block">
-            <div class="code-header">
-              <span>Snippet / Esempio Pratico</span>
-              <button class="btn-copy" onclick="copyCode(this, '${encodeURIComponent(item.code)}')">Copia Codice</button>
+
+        ${currentMode === 'detail' ? `
+          ${item.useCase ? `
+            <div class="usecase-box">
+              <div class="usecase-header">🚀 Scenario Applicativo nel Mondo Reale</div>
+              <div class="usecase-text">${escapeHtml(item.useCase)}</div>
             </div>
-            <pre><code>${escapeHtml(item.code)}</code></pre>
-          </div>
+          ` : ''}
+
+          ${(item.whenToUse || item.whenToAvoid) ? `
+            <div class="pros-cons-grid">
+              ${item.whenToUse ? `
+                <div class="pill-card when-to-use">
+                  <div class="pill-card-title">✅ Quando Usarlo</div>
+                  <div>${escapeHtml(item.whenToUse)}</div>
+                </div>
+              ` : ''}
+              ${item.whenToAvoid ? `
+                <div class="pill-card when-to-avoid">
+                  <div class="pill-card-title">⚠️ Quando Evitarlo</div>
+                  <div>${escapeHtml(item.whenToAvoid)}</div>
+                </div>
+              ` : ''}
+            </div>
+          ` : ''}
+
+          ${item.code ? `
+            <div class="code-block">
+              <div class="code-header">
+                <span>💻 Snippet / Architettura Pratica</span>
+                <button class="btn-copy" onclick="copyCode(this, '${encodeURIComponent(item.code)}')">Copia Codice</button>
+              </div>
+              <pre><code>${escapeHtml(item.code)}</code></pre>
+            </div>
+          ` : ''}
         ` : ''}
       </div>
     `).join('');
   }
 
+  // Chiamata AI con Modello gemini-3.6-flash
   async function fetchTermFromWeb(searchTerm) {
     const apiKey = activeGeminiKey || localStorage.getItem('gemini_api_key');
     const loader = document.getElementById('fetchLoader');
+    const btnGen = document.getElementById('btnGenerateAI');
 
     if (!apiKey) {
       alert('Chiave API non trovata. Clicca sull\'icona ⚙️ in alto a destra per inserirla.');
       return;
     }
 
-    loader.innerHTML = `<span class="spinner">⚡ Interrogazione AI e generazione scheda tecnica...</span>`;
+    if (btnGen) btnGen.disabled = true;
+    loader.innerHTML = `<span class="spinner">⚡ Interrogazione AI e compilazione scheda tecnica avanzata...</span>`;
 
-    const prompt = `Fornisci una scheda tecnica esaustiva sul seguente concetto di sviluppo software: "${searchTerm}".
+    const prompt = `Fornisci una scheda tecnica completa e specialistica sul seguente concetto informatico/sviluppo software: "${searchTerm}".
 Rispondi RIGOROSAMENTE ed ESCLUSIVAMENTE con un JSON valido (senza blocchi markdown \`\`\`json):
 {
   "term": "Nome formale del termine",
   "category": "Una tra: Frontend, Backend, Database, Cloud, DevOps, Architettura, Sicurezza, Algoritmi, Networking, Testing, AI & Dati",
   "summary": "Definizione sintetica ma rigorosa (2 frasi).",
-  "detail": "Spiegazione tecnica approfondita con architettura, casi d'uso ed errori comuni.",
-  "code": "Snippet di codice o comando reale completo che esemplifica il funzionamento."
+  "detail": "Spiegazione tecnica approfondita dell'architettura e del funzionamento interno.",
+  "useCase": "Esempio concreto e pratico di utilizzo in un progetto di produzione aziendale reale (es. e-commerce, gestione flotte, microservizi bancari).",
+  "whenToUse": "Sintesi chiara del miglior scenario in cui adottare questo concetto/tecnologia.",
+  "whenToAvoid": "L'errore comune o il caso tipico in cui NON dovrebbe essere usato (anti-pattern o overkill).",
+  "code": "Snippet di codice, comando shell o diagramma ASCII reale e completo che esemplifica l'implementazione pratica."
 }`;
 
     try {
@@ -851,7 +984,7 @@ Rispondi RIGOROSAMENTE ed ESCLUSIVAMENTE con un JSON valido (senza blocchi markd
       });
 
       const data = await response.json();
-      if (data.error) throw new Error(data.error.message);
+      if (data.error) throw new Error(data.error.message || JSON.stringify(data.error));
 
       let rawText = data.candidates[0].content.parts[0].text;
       rawText = rawText.replace(/```json/gi, '').replace(/```/g, '').trim();
@@ -866,7 +999,42 @@ Rispondi RIGOROSAMENTE ed ESCLUSIVAMENTE con un JSON valido (senza blocchi markd
       renderTerms();
 
     } catch (err) {
-      loader.innerHTML = `<p style="color: #ef4444; margin-top: 1rem;">Errore: ${err.message}</p>`;
+      const errMsg = err.message || '';
+      const isQuota = errMsg.toLowerCase().includes('quota') || errMsg.includes('429') || errMsg.includes('resource_exhausted');
+
+      if (isQuota) {
+        let remainingSeconds = 30;
+        const matchSec = errMsg.match(/retry in ([0-9.]+)s/i);
+        if (matchSec && matchSec[1]) {
+          remainingSeconds = Math.ceil(parseFloat(matchSec[1]));
+        }
+
+        if (retryCountdownTimer) clearInterval(retryCountdownTimer);
+
+        loader.innerHTML = `
+          <div class="quota-box">
+            <strong>⏳ Limite temporaneo raggiunto (Piano Gratuito)</strong><br>
+            Google richiede una breve pausa tra le richieste.<br>
+            Riprova tra: <span id="countdownSpan" style="font-weight: 700; color: #fff;">${remainingSeconds}</span> secondi.
+          </div>
+        `;
+
+        retryCountdownTimer = setInterval(() => {
+          remainingSeconds--;
+          const span = document.getElementById('countdownSpan');
+          if (span) span.textContent = remainingSeconds;
+
+          if (remainingSeconds <= 0) {
+            clearInterval(retryCountdownTimer);
+            if (btnGen) btnGen.disabled = false;
+            loader.innerHTML = `<p style="color: #4ade80; margin-top: 1rem; font-size: 0.9rem;">✅ Ora puoi riprovare a generare la scheda!</p>`;
+          }
+        }, 1000);
+
+      } else {
+        if (btnGen) btnGen.disabled = false;
+        loader.innerHTML = `<p style="color: #ef4444; margin-top: 1rem;">Errore: ${escapeHtml(errMsg)}</p>`;
+      }
     }
   }
 
