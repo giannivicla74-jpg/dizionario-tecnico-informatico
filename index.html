@@ -30,24 +30,28 @@
     body { background-color: var(--bg); color: var(--text); padding: 2rem 1rem; display: flex; justify-content: center; }
     .container { width: 100%; max-width: 850px; }
 
-    header { text-align: center; margin-bottom: 1.5rem; }
-    header h1 { font-size: 2.2rem; color: var(--accent); margin-bottom: 0.3rem; }
-    header p { color: var(--text-muted); }
+    /* Header con pulsante impostazioni */
+    .header-box { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem; }
+    .header-titles h1 { font-size: 2.2rem; color: var(--accent); margin-bottom: 0.2rem; }
+    .header-titles p { color: var(--text-muted); font-size: 0.95rem; }
+    .btn-settings {
+      background: var(--card-bg); border: 1px solid var(--border); color: var(--text);
+      font-size: 1.2rem; padding: 0.5rem 0.7rem; border-radius: 8px; cursor: pointer;
+      transition: background 0.2s;
+    }
+    .btn-settings:hover { background: #334155; }
 
-    /* Barra Configurazione Cloud */
-    .api-box {
-      background: var(--card-bg); border: 1px solid var(--border); border-radius: 8px;
-      padding: 0.8rem 1rem; margin-bottom: 1rem; display: flex; gap: 0.5rem; align-items: center;
+    /* Pannello Impostazioni a comparsa */
+    .settings-panel {
+      display: none; background: var(--card-bg); border: 1px solid var(--border);
+      border-radius: 8px; padding: 1rem; margin-bottom: 1.5rem;
     }
-    .api-box input {
-      flex: 1; padding: 0.4rem 0.6rem; border-radius: 4px; border: 1px solid var(--border);
-      background: #0f172a; color: var(--text); outline: none; font-size: 0.85rem;
+    .settings-panel.open { display: block; }
+    .settings-row { display: flex; gap: 0.5rem; align-items: center; margin-top: 0.5rem; }
+    .settings-row input {
+      flex: 1; padding: 0.5rem 0.8rem; border-radius: 6px; border: 1px solid var(--border);
+      background: #0f172a; color: var(--text); outline: none; font-size: 0.9rem;
     }
-    .api-box button, .btn-action {
-      padding: 0.4rem 0.8rem; background: var(--border); color: var(--text); border: none;
-      border-radius: 4px; cursor: pointer; font-size: 0.85rem; transition: background 0.2s;
-    }
-    .api-box button:hover, .btn-action:hover { background: #475569; }
 
     /* Barra Info Sincronizzazione */
     .tools-bar {
@@ -58,6 +62,12 @@
     .tools-bar span { font-size: 0.85rem; color: var(--text-muted); }
     .sync-badge { color: #4ade80; font-size: 0.8rem; font-weight: 600; }
     .tools-buttons { display: flex; gap: 0.5rem; }
+
+    .btn-action {
+      padding: 0.4rem 0.8rem; background: var(--border); color: var(--text); border: none;
+      border-radius: 4px; cursor: pointer; font-size: 0.85rem; transition: background 0.2s;
+    }
+    .btn-action:hover { background: #475569; }
 
     /* Ricerca */
     .search-box { display: flex; gap: 0.5rem; margin-bottom: 1rem; }
@@ -81,7 +91,7 @@
       background: var(--accent); color: var(--bg); border-color: var(--accent); font-weight: 600;
     }
 
-    /* Toggle Sintesi / Dettaglio */
+    /* Switch Sintesi / Dettaglio */
     .view-toggle { display: flex; gap: 0.5rem; margin-bottom: 1.5rem; }
     .btn-toggle {
       flex: 1; padding: 0.6rem; border: 1px solid var(--border); background: var(--card-bg);
@@ -90,7 +100,7 @@
     }
     .btn-toggle.active { background: var(--accent); color: var(--bg); border-color: var(--accent); }
 
-    /* Card */
+    /* Card Termine */
     .term-card {
       background: var(--card-bg); border: 1px solid var(--border); border-radius: 10px;
       padding: 1.5rem; margin-bottom: 1.2rem;
@@ -123,6 +133,7 @@
     .code-header { font-size: 0.75rem; color: var(--text-muted); text-transform: uppercase; margin-bottom: 0.5rem; font-weight: 700; }
     pre code { font-family: 'Consolas', 'Fira Code', monospace; font-size: 0.9rem; color: #38bdf8; }
 
+    /* Not Found */
     .not-found-box {
       text-align: center; background: var(--card-bg); border: 1px dashed var(--border);
       border-radius: 10px; padding: 2.5rem 1.5rem; margin-top: 1rem;
@@ -139,19 +150,24 @@
 <body>
 
 <div class="container">
-  <header>
-    <h1>DevLexicon</h1>
-    <p>Glossario Tecnico con Sincronizzazione Cloud Firebase</p>
-  </header>
-
-  <!-- Configurazione Chiave Gemini (Sincronizzata su Cloud) -->
-  <div class="api-box">
-    <label for="apiKeyInput" style="font-size: 0.85rem; color: var(--text-muted);">Chiave Gemini Cloud:</label>
-    <input type="password" id="apiKeyInput" placeholder="Inserisci la chiave Gemini (sarà valida su tutti i dispositivi)...">
-    <button onclick="saveCloudApiKey()">Salva su Cloud</button>
+  <div class="header-box">
+    <div class="header-titles">
+      <h1>DevLexicon</h1>
+      <p>Glossario Tecnico con Sincronizzazione Cloud</p>
+    </div>
+    <button class="btn-settings" title="Impostazioni Cloud" onclick="toggleSettings()">⚙️</button>
   </div>
 
-  <!-- Barra Stato Cloud -->
+  <!-- Pannello Impostazioni Nascosto -->
+  <div class="settings-panel" id="settingsPanel">
+    <label style="font-size: 0.85rem; color: var(--text-muted);">Chiave Gemini Cloud (Sincronizzata):</label>
+    <div class="settings-row">
+      <input type="password" id="apiKeyInput" placeholder="Inserisci chiave Gemini...">
+      <button class="btn-action" onclick="saveCloudApiKey()">Salva</button>
+    </div>
+  </div>
+
+  <!-- Barra Info & Backup -->
   <div class="tools-bar">
     <div>
       <span id="termCount">Caricamento dal cloud...</span>
@@ -176,19 +192,17 @@
     <button class="btn-toggle" id="btnDetail" onclick="setViewMode('detail')">Modalità Dettagliata</button>
   </div>
 
-  <!-- Risultati -->
+  <!-- Lista Risultati -->
   <div id="termsList"></div>
 </div>
 
 <script>
-  // Service Worker per PWA
   if ('serviceWorker' in navigator) {
     window.addEventListener('load', () => {
       navigator.serviceWorker.register('./sw.js').catch(err => console.log(err));
     });
   }
 
-  // --- CONFIGURAZIONE FIREBASE ESATTA ---
   const firebaseConfig = {
     apiKey: "AIzaSyB2jGY3q3s4vDD_ARy-xltsjcwS3VDch7E",
     authDomain: "tachocontrol-ad132.firebaseapp.com",
@@ -207,7 +221,11 @@
   let currentMode = 'summary';
   let selectedCategory = 'ALL';
 
-  // 1. Sincronizzazione della Chiave Gemini su nodo separato /settings
+  function toggleSettings() {
+    document.getElementById('settingsPanel').classList.toggle('open');
+  }
+
+  // Sincronizzazione automatica della chiave
   db.ref('settings/gemini_api_key').on('value', (snapshot) => {
     const keyVal = snapshot.val();
     if (keyVal) {
@@ -217,7 +235,7 @@
     }
   });
 
-  // 2. Sincronizzazione dei Termini su nodo separato /dev_lexicon_terms
+  // Sincronizzazione termini
   db.ref('dev_lexicon_terms').on('value', (snapshot) => {
     const data = snapshot.val();
     if (data) {
@@ -233,7 +251,10 @@
     const key = document.getElementById('apiKeyInput').value.trim();
     if (!key) return;
     db.ref('settings/gemini_api_key').set(key)
-      .then(() => alert('Chiave salvata su Cloud! Ora è attiva automaticamente su tutti i tuoi dispositivi.'))
+      .then(() => {
+        alert('Chiave salvata con successo!');
+        toggleSettings();
+      })
       .catch(err => alert('Errore Firebase: ' + err.message));
   }
 
@@ -263,7 +284,7 @@
   }
 
   function deleteTerm(fbKey, termName) {
-    if (confirm(`Vuoi eliminare definitivamente "${termName}" dal database cloud?`)) {
+    if (confirm(`Vuoi eliminare "${termName}" dal database cloud?`)) {
       db.ref('dev_lexicon_terms/' + fbKey).remove();
     }
   }
@@ -331,7 +352,7 @@
     const loader = document.getElementById('fetchLoader');
 
     if (!apiKey) {
-      alert('Configura e salva la chiave Gemini in alto prima di procedere.');
+      alert('Chiave API non trovata. Clicca sull\'icona ⚙️ in alto a destra per inserirla.');
       return;
     }
 
@@ -363,7 +384,6 @@ Rispondi RIGOROSAMENTE ed ESCLUSIVAMENTE con un oggetto JSON valido (senza blocc
       const newTerm = JSON.parse(rawText);
       newTerm.autoFetched = true;
 
-      // Salvataggio sul percorso isolato /dev_lexicon_terms
       const termId = newTerm.term.toLowerCase().replace(/[^a-z0-9]/g, '_');
       await db.ref('dev_lexicon_terms/' + termId).set(newTerm);
 
