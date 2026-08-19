@@ -4,8 +4,13 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta name="theme-color" content="#38bdf8">
-  <title>DevLexicon - Glossario Tecnico</title>
+  <title>DevLexicon - Glossario Tecnico Cloud</title>
   <link rel="manifest" href="manifest.json">
+  
+  <!-- Firebase SDK -->
+  <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-database-compat.js"></script>
+
   <style>
     :root {
       --bg: #0f172a;
@@ -29,6 +34,7 @@
     header h1 { font-size: 2.2rem; color: var(--accent); margin-bottom: 0.3rem; }
     header p { color: var(--text-muted); }
 
+    /* Barra Configurazione Cloud */
     .api-box {
       background: var(--card-bg); border: 1px solid var(--border); border-radius: 8px;
       padding: 0.8rem 1rem; margin-bottom: 1rem; display: flex; gap: 0.5rem; align-items: center;
@@ -43,14 +49,17 @@
     }
     .api-box button:hover, .btn-action:hover { background: #475569; }
 
+    /* Barra Info Sincronizzazione */
     .tools-bar {
       display: flex; justify-content: space-between; align-items: center;
       margin-bottom: 1.5rem; background: rgba(30, 41, 59, 0.5); padding: 0.6rem 1rem;
       border-radius: 8px; border: 1px solid var(--border); flex-wrap: wrap; gap: 0.5rem;
     }
     .tools-bar span { font-size: 0.85rem; color: var(--text-muted); }
+    .sync-badge { color: #4ade80; font-size: 0.8rem; font-weight: 600; }
     .tools-buttons { display: flex; gap: 0.5rem; }
 
+    /* Ricerca */
     .search-box { display: flex; gap: 0.5rem; margin-bottom: 1rem; }
     .search-box input {
       flex: 1; padding: 0.8rem 1rem; border-radius: 8px; border: 1px solid var(--border);
@@ -58,6 +67,7 @@
     }
     .search-box input:focus { border-color: var(--accent); }
 
+    /* Categorie */
     .categories-bar {
       display: flex; gap: 0.5rem; overflow-x: auto; padding-bottom: 0.8rem; margin-bottom: 1rem;
       scrollbar-width: thin;
@@ -71,6 +81,7 @@
       background: var(--accent); color: var(--bg); border-color: var(--accent); font-weight: 600;
     }
 
+    /* Toggle Sintesi / Dettaglio */
     .view-toggle { display: flex; gap: 0.5rem; margin-bottom: 1.5rem; }
     .btn-toggle {
       flex: 1; padding: 0.6rem; border: 1px solid var(--border); background: var(--card-bg);
@@ -79,6 +90,7 @@
     }
     .btn-toggle.active { background: var(--accent); color: var(--bg); border-color: var(--accent); }
 
+    /* Card */
     .term-card {
       background: var(--card-bg); border: 1px solid var(--border); border-radius: 10px;
       padding: 1.5rem; margin-bottom: 1.2rem;
@@ -129,78 +141,100 @@
 <div class="container">
   <header>
     <h1>DevLexicon</h1>
-    <p>Dizionario di programmazione con auto-apprendimento Web / AI</p>
+    <p>Glossario Tecnico con Sincronizzazione Cloud Firebase</p>
   </header>
 
+  <!-- Configurazione Chiave Gemini (Sincronizzata su Cloud) -->
   <div class="api-box">
-    <label for="apiKeyInput" style="font-size: 0.85rem; color: var(--text-muted);">Chiave Gemini API:</label>
-    <input type="password" id="apiKeyInput" placeholder="Incolla la tua API Key...">
-    <button onclick="saveApiKey()">Salva Chiave</button>
+    <label for="apiKeyInput" style="font-size: 0.85rem; color: var(--text-muted);">Chiave Gemini Cloud:</label>
+    <input type="password" id="apiKeyInput" placeholder="Inserisci la chiave Gemini (sarà valida su tutti i dispositivi)...">
+    <button onclick="saveCloudApiKey()">Salva su Cloud</button>
   </div>
 
+  <!-- Barra Stato Cloud -->
   <div class="tools-bar">
-    <span id="termCount">0 termini memorizzati</span>
+    <div>
+      <span id="termCount">Caricamento dal cloud...</span>
+      <span class="sync-badge" id="syncStatus"> ● Cloud Connesso</span>
+    </div>
     <div class="tools-buttons">
-      <button class="btn-action" onclick="exportData()">💾 Esporta Backup</button>
-      <button class="btn-action" onclick="document.getElementById('importFile').click()">📂 Importa</button>
-      <input type="file" id="importFile" accept=".json" style="display: none;" onchange="importData(event)">
+      <button class="btn-action" onclick="exportData()">💾 Backup Locale</button>
     </div>
   </div>
 
+  <!-- Barra Ricerca -->
   <div class="search-box">
     <input type="text" id="searchInput" placeholder="Cerca un termine (es. Docker, Webhook, Polymorphism)...">
   </div>
 
+  <!-- Categorie -->
   <div class="categories-bar" id="categoriesBar"></div>
 
+  <!-- Switch Modalità -->
   <div class="view-toggle">
     <button class="btn-toggle active" id="btnSummary" onclick="setViewMode('summary')">Modalità Sintetica</button>
     <button class="btn-toggle" id="btnDetail" onclick="setViewMode('detail')">Modalità Dettagliata</button>
   </div>
 
+  <!-- Risultati -->
   <div id="termsList"></div>
 </div>
 
 <script>
-  // Registrazione Service Worker per PWA
+  // Service Worker per PWA
   if ('serviceWorker' in navigator) {
     window.addEventListener('load', () => {
-      navigator.serviceWorker.register('./sw.js')
-        .then(() => console.log('Service Worker registrato con successo.'))
-        .catch(err => console.log('Registrazione Service Worker non riuscita:', err));
+      navigator.serviceWorker.register('./sw.js').catch(err => console.log(err));
     });
   }
 
-  const defaultGlossary = [
-    {
-      term: "API (Application Programming Interface)",
-      category: "Architettura",
-      summary: "Insieme di regole e protocolli che permette a due applicazioni software di comunicare tra loro.",
-      detail: "Un'interfaccia di programmazione che definisce le modalità con cui diversi componenti software interagiscono senza conoscerne l'implementazione interna.",
-      code: `// Chiamata API standard in JavaScript\nfetch('https://api.example.com/data')\n  .then(res => res.json())\n  .then(data => console.log(data));`,
-      autoFetched: false
-    },
-    {
-      term: "Recursion (Ricorsione)",
-      category: "Algoritmi",
-      summary: "Tecnica in cui una funzione chiama se stessa per risolvere un problema dividendolo in sottoproblemi più piccoli.",
-      detail: "Un approccio algoritmico in cui una funzione invoca se stessa fino a raggiungere una condizione di arresto definita 'caso base'.",
-      code: `function countdown(n) {\n  if (n <= 0) return;\n  console.log(n);\n  countdown(n - 1);\n}`,
-      autoFetched: false
-    }
-  ];
+  // --- CONFIGURAZIONE FIREBASE ESATTA ---
+  const firebaseConfig = {
+    apiKey: "AIzaSyB2jGY3q3s4vDD_ARy-xltsjcwS3VDch7E",
+    authDomain: "tachocontrol-ad132.firebaseapp.com",
+    databaseURL: "https://tachocontrol-ad132-default-rtdb.europe-west1.firebasedatabase.app",
+    projectId: "tachocontrol-ad132",
+    storageBucket: "tachocontrol-ad132.firebasestorage.app",
+    messagingSenderId: "337602106666",
+    appId: "1:337602106666:web:d57e633e9cd487cf6fba53"
+  };
 
-  let glossary = JSON.parse(localStorage.getItem('dev_lexicon_terms')) || defaultGlossary;
+  firebase.initializeApp(firebaseConfig);
+  const db = firebase.database();
+
+  let glossary = [];
+  let activeGeminiKey = '';
   let currentMode = 'summary';
   let selectedCategory = 'ALL';
 
-  const storedKey = localStorage.getItem('gemini_api_key') || '';
-  if (storedKey) document.getElementById('apiKeyInput').value = storedKey;
+  // 1. Sincronizzazione della Chiave Gemini su nodo separato /settings
+  db.ref('settings/gemini_api_key').on('value', (snapshot) => {
+    const keyVal = snapshot.val();
+    if (keyVal) {
+      activeGeminiKey = keyVal;
+      document.getElementById('apiKeyInput').value = keyVal;
+      localStorage.setItem('gemini_api_key', keyVal);
+    }
+  });
 
-  function saveApiKey() {
+  // 2. Sincronizzazione dei Termini su nodo separato /dev_lexicon_terms
+  db.ref('dev_lexicon_terms').on('value', (snapshot) => {
+    const data = snapshot.val();
+    if (data) {
+      glossary = Object.keys(data).map(key => ({ _fbKey: key, ...data[key] }));
+    } else {
+      glossary = [];
+    }
+    renderCategories();
+    renderTerms(document.getElementById('searchInput').value);
+  });
+
+  function saveCloudApiKey() {
     const key = document.getElementById('apiKeyInput').value.trim();
-    localStorage.setItem('gemini_api_key', key);
-    alert('Chiave API salvata con successo!');
+    if (!key) return;
+    db.ref('settings/gemini_api_key').set(key)
+      .then(() => alert('Chiave salvata su Cloud! Ora è attiva automaticamente su tutti i tuoi dispositivi.'))
+      .catch(err => alert('Errore Firebase: ' + err.message));
   }
 
   function setViewMode(mode) {
@@ -228,12 +262,9 @@
     `).join('');
   }
 
-  function deleteTerm(termToDelete) {
-    if (confirm(`Vuoi eliminare "${termToDelete}"?`)) {
-      glossary = glossary.filter(item => item.term !== termToDelete);
-      localStorage.setItem('dev_lexicon_terms', JSON.stringify(glossary));
-      renderCategories();
-      renderTerms(document.getElementById('searchInput').value);
+  function deleteTerm(fbKey, termName) {
+    if (confirm(`Vuoi eliminare definitivamente "${termName}" dal database cloud?`)) {
+      db.ref('dev_lexicon_terms/' + fbKey).remove();
     }
   }
 
@@ -241,37 +272,16 @@
     const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(glossary, null, 2));
     const a = document.createElement('a');
     a.setAttribute("href", dataStr);
-    a.setAttribute("download", `glossario_dev_${new Date().toISOString().slice(0, 10)}.json`);
+    a.setAttribute("download", `glossario_cloud_${new Date().toISOString().slice(0, 10)}.json`);
     document.body.appendChild(a);
     a.click();
     a.remove();
   }
 
-  function importData(event) {
-    const file = event.target.files[0];
-    if (!file) return;
-    const reader = new FileReader();
-    reader.onload = function(e) {
-      try {
-        const imported = JSON.parse(e.target.result);
-        if (Array.isArray(imported)) {
-          glossary = imported;
-          localStorage.setItem('dev_lexicon_terms', JSON.stringify(glossary));
-          renderCategories();
-          renderTerms();
-          alert('Importazione completata!');
-        }
-      } catch (err) {
-        alert('File non valido.');
-      }
-    };
-    reader.readAsText(file);
-  }
-
   function renderTerms(query = '') {
     const listContainer = document.getElementById('termsList');
     const cleanQuery = query.trim().toLowerCase();
-    document.getElementById('termCount').innerText = `${glossary.length} termini memorizzati`;
+    document.getElementById('termCount').innerText = `${glossary.length} termini synchronizzati`;
 
     let filtered = glossary.filter(item => {
       const matchQuery = item.term.toLowerCase().includes(cleanQuery) || 
@@ -283,7 +293,7 @@
     if (filtered.length === 0 && cleanQuery.length > 0) {
       listContainer.innerHTML = `
         <div class="not-found-box">
-          <p>Il termine "<strong>${escapeHtml(query)}</strong>" non è presente nel glossario.</p>
+          <p>Il termine "<strong>${escapeHtml(query)}</strong>" non è presente nel database cloud.</p>
           <button class="btn-search-web" onclick="fetchTermFromWeb('${escapeHtml(query)}')">
             🔍 Cerca e Aggiungi via AI / Web
           </button>
@@ -297,7 +307,7 @@
       <div class="term-card">
         <div class="card-header">
           <h2>${escapeHtml(item.term)}</h2>
-          <button class="btn-delete" title="Elimina" onclick="deleteTerm('${escapeHtml(item.term)}')">🗑️</button>
+          <button class="btn-delete" title="Elimina dal Cloud" onclick="deleteTerm('${item._fbKey}', '${escapeHtml(item.term)}')">🗑️</button>
         </div>
         <div class="badge-group">
           <span class="category-badge">${escapeHtml(item.category || 'Generale')}</span>
@@ -317,15 +327,15 @@
   }
 
   async function fetchTermFromWeb(searchTerm) {
-    const apiKey = localStorage.getItem('gemini_api_key');
+    const apiKey = activeGeminiKey || localStorage.getItem('gemini_api_key');
     const loader = document.getElementById('fetchLoader');
 
     if (!apiKey) {
-      alert('Inserisci e salva una chiave Gemini API per la ricerca.');
+      alert('Configura e salva la chiave Gemini in alto prima di procedere.');
       return;
     }
 
-    loader.innerHTML = `<span class="spinner">Interrogazione e generazione scheda con codice...</span>`;
+    loader.innerHTML = `<span class="spinner">Interrogazione AI e sincronizzazione cloud in corso...</span>`;
 
     const prompt = `Fornisci la spiegazione del termine informatico/sviluppo software: "${searchTerm}".
 Rispondi RIGOROSAMENTE ed ESCLUSIVAMENTE con un oggetto JSON valido (senza blocchi markdown \`\`\`json) con questa struttura esatta:
@@ -341,9 +351,7 @@ Rispondi RIGOROSAMENTE ed ESCLUSIVAMENTE con un oggetto JSON valido (senza blocc
       const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-3.6-flash:generateContent?key=${apiKey}`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          contents: [{ parts: [{ text: prompt }] }]
-        })
+        body: JSON.stringify({ contents: [{ parts: [{ text: prompt }] }] })
       });
 
       const data = await response.json();
@@ -355,12 +363,12 @@ Rispondi RIGOROSAMENTE ed ESCLUSIVAMENTE con un oggetto JSON valido (senza blocc
       const newTerm = JSON.parse(rawText);
       newTerm.autoFetched = true;
 
-      glossary = glossary.filter(i => i.term.toLowerCase() !== newTerm.term.toLowerCase());
-      glossary.unshift(newTerm);
-      localStorage.setItem('dev_lexicon_terms', JSON.stringify(glossary));
+      // Salvataggio sul percorso isolato /dev_lexicon_terms
+      const termId = newTerm.term.toLowerCase().replace(/[^a-z0-9]/g, '_');
+      await db.ref('dev_lexicon_terms/' + termId).set(newTerm);
 
-      renderCategories();
-      renderTerms(searchTerm);
+      document.getElementById('searchInput').value = '';
+      renderTerms();
 
     } catch (err) {
       loader.innerHTML = `<p style="color: #ef4444; margin-top: 1rem;">Errore: ${err.message}</p>`;
@@ -375,9 +383,6 @@ Rispondi RIGOROSAMENTE ed ESCLUSIVAMENTE con un oggetto JSON valido (senza blocc
   document.getElementById('searchInput').addEventListener('input', (e) => {
     renderTerms(e.target.value);
   });
-
-  renderCategories();
-  renderTerms();
 </script>
 
 </body>
