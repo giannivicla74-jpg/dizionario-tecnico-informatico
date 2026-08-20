@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta name="theme-color" content="#0ea5e9">
-  <title>DevLexicon • Enciclopedia Tecnica Cloud</title>
+  <title>DevLexicon • Enciclopedia Tecnica Cloud &amp; Code Runner</title>
   <link rel="manifest" href="manifest.json">
   
   <!-- Font Google Plus Jakarta Sans & Fira Code -->
@@ -12,9 +12,16 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500;600&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 
+  <!-- PrismJS Syntax Highlighting Theme (Dark Tomorrow) -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css">
+
   <!-- Firebase SDK -->
   <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-database-compat.js"></script>
+
+  <!-- PrismJS Core & Autoloader -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/plugins/autoloader/prism-autoloader.min.js"></script>
 
   <style>
     :root {
@@ -47,14 +54,14 @@
         radial-gradient(at 100% 100%, rgba(99, 102, 241, 0.08) 0px, transparent 50%);
       background-attachment: fixed;
       color: var(--text); 
-      padding: 2.5rem 1rem 1.5rem 1rem; 
+      padding: 2.5rem 1rem 5.5rem 1rem; 
       display: flex; 
       flex-direction: column; 
       align-items: center; 
       min-height: 100vh; 
     }
 
-    .container { width: 100%; max-width: 950px; flex: 1; }
+    .container { width: 100%; max-width: 980px; flex: 1; }
 
     /* Header */
     .header-box { 
@@ -113,7 +120,7 @@
       background: rgba(244, 63, 94, 0.15); 
     }
 
-    /* Pannello Impostazioni Avanzate */
+    /* Pannello Impostazioni */
     .settings-panel {
       display: none; 
       background: var(--card-bg); 
@@ -148,7 +155,7 @@
     }
     .settings-row input:focus { border-color: var(--accent); }
 
-    /* Modulo Configurazione Audio Vocale */
+    /* Modulo Sintesi Vocale */
     .voice-config-box {
       background: rgba(15, 23, 42, 0.6);
       border: 1px solid var(--border);
@@ -156,11 +163,7 @@
       padding: 1.2rem;
       margin-top: 0.8rem;
     }
-    .voice-filter-group {
-      display: flex;
-      gap: 0.5rem;
-      margin-bottom: 1rem;
-    }
+    .voice-filter-group { display: flex; gap: 0.5rem; margin-bottom: 1rem; }
     .btn-voice-filter {
       flex: 1;
       padding: 0.45rem 0.6rem;
@@ -191,12 +194,7 @@
       cursor: pointer;
     }
     .voice-select:focus { border-color: var(--accent); }
-    .sliders-grid {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 1.2rem;
-      margin-bottom: 0.5rem;
-    }
+    .sliders-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1.2rem; }
     @media (max-width: 600px) { .sliders-grid { grid-template-columns: 1fr; } }
     .slider-item { display: flex; flex-direction: column; gap: 0.4rem; }
     .slider-item label {
@@ -207,13 +205,9 @@
       font-weight: 600;
     }
     .slider-item label span { color: var(--accent); }
-    .slider-item input[type="range"] {
-      width: 100%;
-      accent-color: var(--accent);
-      cursor: pointer;
-    }
+    .slider-item input[type="range"] { width: 100%; accent-color: var(--accent); cursor: pointer; }
 
-    /* Barra Info Sincronizzazione */
+    /* Barra Info & Tools */
     .tools-bar {
       display: flex; 
       justify-content: space-between; 
@@ -242,17 +236,87 @@
       font-weight: 600;
       transition: all 0.2s;
     }
-    .btn-action:hover { 
-      background: rgba(255, 255, 255, 0.1); 
-      border-color: rgba(255, 255, 255, 0.25);
-    }
+    .btn-action:hover { background: rgba(255, 255, 255, 0.1); border-color: rgba(255, 255, 255, 0.25); }
+    .btn-action.btn-podcast { background: rgba(245, 158, 11, 0.15); border-color: rgba(245, 158, 11, 0.4); color: #fbbf24; }
+    .btn-action.btn-podcast:hover { background: rgba(245, 158, 11, 0.25); }
     .btn-action.btn-import { background: rgba(20, 184, 166, 0.15); border-color: rgba(20, 184, 166, 0.4); color: #2dd4bf; }
     .btn-action.btn-import:hover { background: rgba(20, 184, 166, 0.25); }
     .btn-action.btn-pdf { background: rgba(99, 102, 241, 0.15); border-color: rgba(99, 102, 241, 0.4); color: #a5b4fc; }
     .btn-action.btn-pdf:hover { background: rgba(99, 102, 241, 0.25); }
 
+    /* Player Galleggiante Podcast */
+    .podcast-floating-player {
+      position: fixed;
+      bottom: 1.25rem;
+      left: 50%;
+      transform: translateX(-50%);
+      width: calc(100% - 2rem);
+      max-width: 850px;
+      background: rgba(15, 23, 42, 0.94);
+      backdrop-filter: blur(20px);
+      border: 1px solid rgba(56, 189, 248, 0.4);
+      border-radius: 16px;
+      padding: 0.9rem 1.4rem;
+      box-shadow: 0 10px 35px rgba(0, 0, 0, 0.6), 0 0 20px rgba(56, 189, 248, 0.2);
+      display: none;
+      align-items: center;
+      justify-content: space-between;
+      gap: 1rem;
+      z-index: 1000;
+      animation: fadeIn 0.3s ease;
+    }
+    .podcast-floating-player.active { display: flex; }
+    .player-track-info {
+      flex: 1;
+      min-width: 0;
+      display: flex;
+      flex-direction: column;
+    }
+    .player-track-title {
+      font-size: 0.98rem;
+      font-weight: 800;
+      color: #38bdf8;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .player-track-sub {
+      font-size: 0.76rem;
+      color: var(--text-muted);
+    }
+    .player-controls {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+    .btn-player {
+      background: rgba(255, 255, 255, 0.08);
+      border: 1px solid var(--border);
+      color: var(--text);
+      width: 38px;
+      height: 38px;
+      border-radius: 10px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1rem;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .btn-player:hover { background: rgba(56, 189, 248, 0.2); border-color: var(--accent); color: var(--accent); }
+    .btn-player.play-btn {
+      width: 44px;
+      height: 44px;
+      background: var(--accent-gradient);
+      color: #040813;
+      border: none;
+      font-size: 1.15rem;
+      font-weight: 800;
+    }
+    .btn-player.close-btn { color: #f43f5e; border-color: rgba(244, 63, 94, 0.3); }
+    .btn-player.close-btn:hover { background: rgba(244, 63, 94, 0.2); border-color: #f43f5e; color: #fff; }
+
     /* Ricerca */
-    .search-section { transition: all 0.3s ease; }
     .search-box { display: flex; gap: 0.5rem; margin-bottom: 1.25rem; }
     .search-box input {
       flex: 1; 
@@ -266,12 +330,9 @@
       outline: none;
       transition: all 0.25s;
     }
-    .search-box input:focus { 
-      border-color: var(--border-focus); 
-      box-shadow: var(--glow);
-    }
+    .search-box input:focus { border-color: var(--border-focus); box-shadow: var(--glow); }
 
-    /* Barra Categorie & Pulsanti Avanzati */
+    /* Categorie Bar */
     .categories-bar {
       display: flex; 
       gap: 0.6rem; 
@@ -279,7 +340,6 @@
       padding-bottom: 0.5rem; 
       margin-bottom: 1.25rem;
       scrollbar-width: none;
-      -ms-overflow-style: none;
       -webkit-overflow-scrolling: touch;
       cursor: grab;
     }
@@ -304,7 +364,7 @@
       background: var(--accent-gradient); 
       color: #040813; 
       border-color: transparent; 
-      font-weight: 700;
+      font-weight: 700; 
       box-shadow: 0 0 15px rgba(56, 189, 248, 0.35);
     }
     .cat-filter-btn.favorites-btn.active {
@@ -333,8 +393,17 @@
       border-color: transparent;
       box-shadow: 0 0 15px rgba(14, 165, 233, 0.4);
     }
-    
-    /* Stile Cartelle Preferiti ad Alto Contrasto */
+    .cat-filter-btn.showdown-mode-btn {
+      background: rgba(244, 63, 94, 0.15);
+      border-color: rgba(244, 63, 94, 0.4);
+      color: #fda4af;
+    }
+    .cat-filter-btn.showdown-mode-btn.active {
+      background: linear-gradient(135deg, #f43f5e 0%, #f59e0b 100%);
+      color: white;
+      border-color: transparent;
+      box-shadow: 0 0 15px rgba(244, 63, 94, 0.4);
+    }
     .cat-filter-btn.folder-pill {
       background: rgba(251, 191, 36, 0.15) !important;
       border: 1px solid rgba(251, 191, 36, 0.4) !important;
@@ -349,7 +418,7 @@
       box-shadow: 0 0 15px rgba(251, 191, 36, 0.4);
     }
 
-    /* Switch Sintesi / Dettaglio */
+    /* Switch Modalità */
     .view-toggle { 
       display: flex; 
       gap: 0.5rem; 
@@ -367,7 +436,7 @@
       color: var(--text-muted); 
       border-radius: 9px; 
       cursor: pointer; 
-      font-weight: 600;
+      font-weight: 600; 
       font-size: 0.9rem;
       transition: all 0.2s;
     }
@@ -378,32 +447,120 @@
       border: 1px solid var(--border);
     }
 
-    /* Flashcard / Study Container */
+    /* Showdown Wrapper */
+    .showdown-wrapper {
+      background: var(--card-bg);
+      backdrop-filter: blur(16px);
+      border: 1px solid var(--border);
+      border-radius: 18px;
+      padding: 2rem;
+      margin-top: 1rem;
+      box-shadow: 0 15px 35px rgba(0,0,0,0.4);
+      animation: fadeIn 0.3s ease;
+    }
+    .showdown-header { text-align: center; margin-bottom: 1.5rem; }
+    .showdown-header h2 {
+      font-size: 1.8rem;
+      font-weight: 800;
+      background: linear-gradient(135deg, #f43f5e 0%, #f59e0b 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      margin-bottom: 0.4rem;
+    }
+    .showdown-header p { font-size: 0.9rem; color: var(--text-muted); }
+    .showdown-controls-grid {
+      display: grid;
+      grid-template-columns: 1fr auto 1fr;
+      gap: 1.2rem;
+      align-items: center;
+      margin-bottom: 1.5rem;
+    }
+    @media (max-width: 700px) {
+      .showdown-controls-grid { grid-template-columns: 1fr; }
+      .vs-badge-separator { margin: 0.5rem auto; }
+    }
+    .vs-badge-separator {
+      font-weight: 900;
+      font-size: 1.2rem;
+      background: linear-gradient(135deg, #f43f5e 0%, #f59e0b 100%);
+      color: #fff;
+      padding: 0.5rem 0.8rem;
+      border-radius: 50%;
+      text-align: center;
+      box-shadow: 0 0 15px rgba(244, 63, 94, 0.4);
+    }
+    .showdown-select-col { display: flex; flex-direction: column; gap: 0.4rem; }
+    .showdown-select-col label { font-size: 0.82rem; font-weight: 700; color: var(--accent); }
+    .showdown-search-input {
+      width: 100%;
+      padding: 0.85rem 1rem;
+      border-radius: 10px;
+      border: 1px solid var(--border);
+      background: var(--code-bg);
+      color: #ffffff;
+      font-size: 0.95rem;
+      outline: none;
+      transition: border-color 0.2s;
+    }
+    .showdown-search-input:focus { border-color: var(--accent); box-shadow: var(--glow); }
+    .showdown-actions-row { display: flex; justify-content: center; gap: 0.75rem; margin-bottom: 1.5rem; flex-wrap: wrap; }
+    .btn-showdown-ai {
+      background: linear-gradient(135deg, #f43f5e 0%, #f59e0b 100%);
+      color: white;
+      border: none;
+      padding: 0.75rem 1.4rem;
+      border-radius: 10px;
+      font-weight: 700;
+      font-size: 0.92rem;
+      cursor: pointer;
+      box-shadow: 0 4px 15px rgba(244, 63, 94, 0.4);
+      transition: all 0.2s;
+    }
+    .btn-showdown-ai:hover:not(:disabled) { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(244, 63, 94, 0.6); }
+    .btn-showdown-ai:disabled { opacity: 0.6; cursor: not-allowed; }
+
+    .showdown-comparison-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1.2rem; margin-top: 1.5rem; }
+    @media (max-width: 700px) { .showdown-comparison-grid { grid-template-columns: 1fr; } }
+    .showdown-col-card { background: rgba(15, 23, 42, 0.7); border: 1px solid var(--border); border-radius: 12px; padding: 1.25rem; }
+    .showdown-col-card.col-a { border-top: 3px solid #38bdf8; }
+    .showdown-col-card.col-b { border-top: 3px solid #f43f5e; }
+    .showdown-col-title { font-size: 1.2rem; font-weight: 800; color: #ffffff; margin-bottom: 0.75rem; }
+    .showdown-verdict-box {
+      margin-top: 1.5rem;
+      background: rgba(56, 189, 248, 0.12);
+      border: 1px solid rgba(56, 189, 248, 0.4);
+      border-radius: 12px;
+      padding: 1.25rem 1.5rem;
+      line-height: 1.6;
+    }
+    .showdown-verdict-title {
+      font-size: 0.95rem;
+      font-weight: 800;
+      color: var(--accent);
+      margin-bottom: 0.5rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    /* Flashcard SRS Container */
     .flashcard-wrapper {
       background: var(--card-bg);
       backdrop-filter: blur(16px);
       border: 1px solid var(--border);
       border-radius: 18px;
-      padding: 2.5rem;
+      padding: 2.2rem;
       text-align: center;
       margin-top: 1rem;
       box-shadow: 0 15px 35px rgba(0,0,0,0.4);
       animation: fadeIn 0.3s ease;
     }
-    .flashcard-category {
-      font-size: 0.8rem;
-      text-transform: uppercase;
-      letter-spacing: 1px;
-      color: #a78bfa;
-      font-weight: 700;
-      margin-bottom: 0.75rem;
-    }
-    .flashcard-title {
-      font-size: 2.2rem;
-      font-weight: 800;
-      color: #ffffff;
-      margin-bottom: 1.5rem;
-    }
+    .flashcard-header-stats { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.25rem; flex-wrap: wrap; gap: 0.5rem; }
+    .srs-badge { font-size: 0.76rem; font-weight: 700; padding: 0.25rem 0.65rem; border-radius: 20px; letter-spacing: 0.4px; }
+    .srs-badge.due { background: rgba(244, 63, 94, 0.15); color: #fb7185; border: 1px solid rgba(244, 63, 94, 0.35); }
+    .srs-badge.learning { background: rgba(251, 191, 36, 0.15); color: #fbbf24; border: 1px solid rgba(251, 191, 36, 0.35); }
+    .srs-badge.mastered { background: rgba(34, 197, 94, 0.15); color: #4ade80; border: 1px solid rgba(34, 197, 94, 0.35); }
+    .flashcard-title { font-size: 2.2rem; font-weight: 800; color: #ffffff; margin-bottom: 1.5rem; line-height: 1.2; }
     .flashcard-hidden-content {
       background: rgba(15, 23, 42, 0.8);
       border: 1px dashed rgba(167, 139, 250, 0.4);
@@ -414,6 +571,32 @@
       display: none;
     }
     .flashcard-hidden-content.revealed { display: block; animation: fadeIn 0.3s ease; }
+
+    /* Pulsantiera SRS */
+    .srs-button-group { display: flex; gap: 0.75rem; justify-content: center; margin-top: 1rem; flex-wrap: wrap; }
+    .btn-srs {
+      flex: 1;
+      min-width: 140px;
+      padding: 0.85rem 1rem;
+      border-radius: 12px;
+      font-weight: 700;
+      font-size: 0.92rem;
+      cursor: pointer;
+      transition: all 0.2s;
+      border: 1px solid transparent;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 0.2rem;
+    }
+    .btn-srs span.sub { font-size: 0.72rem; font-weight: 500; opacity: 0.85; }
+    .btn-srs.hard { background: rgba(244, 63, 94, 0.15); border-color: rgba(244, 63, 94, 0.4); color: #f87171; }
+    .btn-srs.hard:hover { background: rgba(244, 63, 94, 0.3); transform: translateY(-2px); }
+    .btn-srs.good { background: rgba(251, 191, 36, 0.15); border-color: rgba(251, 191, 36, 0.4); color: #fde047; }
+    .btn-srs.good:hover { background: rgba(251, 191, 36, 0.3); transform: translateY(-2px); }
+    .btn-srs.easy { background: rgba(34, 197, 94, 0.15); border-color: rgba(34, 197, 94, 0.4); color: #4ade80; }
+    .btn-srs.easy:hover { background: rgba(34, 197, 94, 0.3); transform: translateY(-2px); }
+
     .btn-reveal {
       background: linear-gradient(135deg, #8b5cf6 0%, #ec4899 100%);
       color: white;
@@ -429,21 +612,8 @@
       margin-bottom: 0.5rem;
     }
     .btn-reveal:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(139, 92, 246, 0.6); }
-    .btn-next-card {
-      background: rgba(255, 255, 255, 0.08);
-      color: var(--text);
-      border: 1px solid var(--border);
-      padding: 0.8rem 1.5rem;
-      border-radius: 12px;
-      font-weight: 700;
-      cursor: pointer;
-      font-size: 0.95rem;
-      transition: all 0.2s;
-      margin-bottom: 0.5rem;
-    }
-    .btn-next-card:hover { background: rgba(255, 255, 255, 0.15); border-color: var(--accent); }
 
-    /* Quiz Container (Risposta Multipla) */
+    /* Quiz Container */
     .quiz-wrapper {
       background: var(--card-bg);
       backdrop-filter: blur(16px);
@@ -454,12 +624,7 @@
       box-shadow: 0 15px 35px rgba(0,0,0,0.4);
       animation: fadeIn 0.3s ease;
     }
-    .quiz-header-row {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin-bottom: 1rem;
-    }
+    .quiz-header-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem; }
     .quiz-score-badge {
       font-size: 0.85rem;
       font-weight: 700;
@@ -469,19 +634,8 @@
       padding: 0.25rem 0.75rem;
       border-radius: 20px;
     }
-    .quiz-question {
-      font-size: 1.25rem;
-      font-weight: 700;
-      color: #ffffff;
-      margin-bottom: 1.5rem;
-      line-height: 1.5;
-    }
-    .quiz-options-grid {
-      display: flex;
-      flex-direction: column;
-      gap: 0.75rem;
-      margin-bottom: 1.5rem;
-    }
+    .quiz-question { font-size: 1.25rem; font-weight: 700; color: #ffffff; margin-bottom: 1.5rem; line-height: 1.5; }
+    .quiz-options-grid { display: flex; flex-direction: column; gap: 0.75rem; margin-bottom: 1.5rem; }
     .quiz-option-btn {
       width: 100%;
       text-align: left;
@@ -495,91 +649,12 @@
       transition: all 0.2s;
       line-height: 1.4;
     }
-    .quiz-option-btn:hover:not(:disabled) {
-      border-color: var(--accent);
-      background: rgba(56, 189, 248, 0.1);
-      color: #ffffff;
-    }
-    .quiz-option-btn.correct {
-      background: rgba(34, 197, 94, 0.2) !important;
-      border-color: #22c55e !important;
-      color: #4ade80 !important;
-      font-weight: 700;
-    }
-    .quiz-option-btn.wrong {
-      background: rgba(244, 63, 94, 0.2) !important;
-      border-color: #f43f5e !important;
-      color: #f87171 !important;
-    }
-    .quiz-footer {
-      display: flex;
-      justify-content: flex-end;
-      gap: 0.75rem;
-    }
+    .quiz-option-btn:hover:not(:disabled) { border-color: var(--accent); background: rgba(56, 189, 248, 0.1); color: #ffffff; }
+    .quiz-option-btn.correct { background: rgba(34, 197, 94, 0.2) !important; border-color: #22c55e !important; color: #4ade80 !important; font-weight: 700; }
+    .quiz-option-btn.wrong { background: rgba(244, 63, 94, 0.2) !important; border-color: #f43f5e !important; color: #f87171 !important; }
+    .quiz-footer { display: flex; justify-content: flex-end; gap: 0.75rem; }
 
-    /* Sezione Note e Cartelle Preferiti */
-    .fav-meta-box {
-      margin-top: 1.25rem;
-      background: rgba(15, 23, 42, 0.7);
-      border: 1px solid var(--border);
-      border-radius: 10px;
-      padding: 1rem;
-    }
-    .fav-meta-row {
-      display: flex;
-      gap: 0.75rem;
-      align-items: center;
-      margin-bottom: 0.75rem;
-      flex-wrap: wrap;
-    }
-    .fav-select {
-      background: var(--code-bg);
-      border: 1px solid var(--border);
-      color: var(--text);
-      padding: 0.45rem 0.75rem;
-      border-radius: 8px;
-      font-size: 0.85rem;
-      outline: none;
-      cursor: pointer;
-    }
-    .fav-select:focus { border-color: var(--accent); }
-    .notes-textarea {
-      width: 100%;
-      background: var(--code-bg);
-      border: 1px solid var(--border);
-      color: var(--text);
-      padding: 0.75rem;
-      border-radius: 8px;
-      font-size: 0.9rem;
-      resize: vertical;
-      min-height: 60px;
-      outline: none;
-    }
-    .notes-textarea:focus { border-color: var(--accent); }
-
-    /* Box Suggerimento "Forse cercavi" */
-    .did-you-mean-box {
-      background: rgba(56, 189, 248, 0.12);
-      border: 1px solid rgba(56, 189, 248, 0.4);
-      border-radius: 12px;
-      padding: 0.9rem 1.25rem;
-      margin-bottom: 1.25rem;
-      display: flex;
-      align-items: center;
-      gap: 0.5rem;
-      font-size: 0.95rem;
-      color: #cbd5e1;
-      animation: fadeIn 0.2s ease;
-    }
-    .did-you-mean-link {
-      color: var(--accent);
-      font-weight: 700;
-      text-decoration: underline;
-      cursor: pointer;
-    }
-    .did-you-mean-link:hover { color: #ffffff; }
-
-    /* Term Card */
+    /* Term Card & Note */
     .term-card {
       background: var(--card-bg); 
       backdrop-filter: blur(16px);
@@ -595,24 +670,14 @@
       transform: translateY(-2px);
       box-shadow: 0 12px 30px rgba(0, 0, 0, 0.35);
     }
-    .card-header {
-      display: flex; 
-      justify-content: space-between; 
-      align-items: center; 
-      margin-bottom: 0.75rem;
+    .term-card.podcast-active {
+      border-color: #38bdf8 !important;
+      box-shadow: 0 0 25px rgba(56, 189, 248, 0.35) !important;
     }
-    .term-card h2 { 
-      font-size: 1.35rem; 
-      font-weight: 700;
-      color: #ffffff;
-      letter-spacing: -0.3px;
-    }
+    .card-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.75rem; }
+    .term-card h2 { font-size: 1.35rem; font-weight: 700; color: #ffffff; letter-spacing: -0.3px; }
+    .card-header-actions { display: flex; align-items: center; gap: 0.4rem; }
 
-    .card-header-actions {
-      display: flex;
-      align-items: center;
-      gap: 0.4rem;
-    }
     .btn-card-tool {
       background: rgba(255, 255, 255, 0.05);
       border: 1px solid var(--border);
@@ -623,24 +688,10 @@
       border-radius: 8px;
       transition: all 0.2s;
     }
-    .btn-card-tool:hover {
-      color: var(--accent);
-      border-color: var(--accent);
-      background: rgba(56, 189, 248, 0.1);
-    }
-    .btn-card-tool.starred {
-      color: var(--star);
-      border-color: var(--star);
-      background: rgba(251, 191, 36, 0.15);
-    }
-    .btn-card-tool.speaking {
-      color: #ef4444 !important;
-      border-color: #ef4444 !important;
-      background: rgba(239, 68, 68, 0.15) !important;
-      animation: pulse 1.2s infinite;
-    }
+    .btn-card-tool:hover { color: var(--accent); border-color: var(--accent); background: rgba(56, 189, 248, 0.1); }
+    .btn-card-tool.starred { color: var(--star); border-color: var(--star); background: rgba(251, 191, 36, 0.15); }
+    .btn-card-tool.speaking { color: #ef4444 !important; border-color: #ef4444 !important; background: rgba(239, 68, 68, 0.15) !important; animation: pulse 1.2s infinite; }
 
-    /* Pulsante Cestino Protetto */
     .btn-delete {
       display: none;
       background: rgba(244, 63, 94, 0.15); 
@@ -656,8 +707,7 @@
     .btn-delete:hover { background: var(--danger); color: white; }
     body.edit-mode .btn-delete { display: inline-flex; align-items: center; gap: 0.3rem; }
 
-    /* Badge */
-    .badge-group { display: flex; gap: 0.5rem; margin-bottom: 1rem; }
+    .badge-group { display: flex; gap: 0.5rem; margin-bottom: 1rem; align-items: center; flex-wrap: wrap; }
     .category-badge {
       font-size: 0.72rem; 
       background: var(--badge); 
@@ -679,13 +729,7 @@
       letter-spacing: 0.5px;
     }
 
-    .text-content { 
-      line-height: 1.7; 
-      color: #cbd5e1; 
-      font-size: 0.96rem;
-    }
-
-    /* Scenario Reale */
+    .text-content { line-height: 1.7; color: #cbd5e1; font-size: 0.96rem; }
     .usecase-box {
       margin-top: 1.25rem;
       background: rgba(15, 23, 42, 0.65);
@@ -701,160 +745,119 @@
       text-transform: uppercase;
       letter-spacing: 0.5px;
       margin-bottom: 0.4rem;
-      display: flex;
-      align-items: center;
-      gap: 0.4rem;
     }
-    .usecase-text {
-      font-size: 0.92rem;
-      color: #e2e8f0;
-      line-height: 1.6;
-    }
+    .usecase-text { font-size: 0.92rem; color: #e2e8f0; line-height: 1.6; }
 
-    /* Quando Usarlo vs Quando Evitarlo */
-    .pros-cons-grid {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 0.75rem;
-      margin-top: 1rem;
-    }
-    @media (max-width: 600px) {
-      .pros-cons-grid { grid-template-columns: 1fr; }
-    }
-    .pill-card {
-      padding: 0.75rem 1rem;
-      border-radius: 10px;
-      font-size: 0.88rem;
-      line-height: 1.5;
-    }
-    .pill-card.when-to-use {
-      background: rgba(34, 197, 94, 0.08);
-      border: 1px solid rgba(34, 197, 94, 0.25);
-      color: #bbf7d0;
-    }
-    .pill-card.when-to-avoid {
-      background: rgba(244, 63, 94, 0.08);
-      border: 1px solid rgba(244, 63, 94, 0.25);
-      color: #fecdd3;
-    }
-    .pill-card-title {
-      font-size: 0.75rem;
-      font-weight: 700;
-      text-transform: uppercase;
-      margin-bottom: 0.25rem;
-      display: flex;
-      align-items: center;
-      gap: 0.35rem;
-    }
+    .pros-cons-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 0.75rem; margin-top: 1rem; }
+    @media (max-width: 600px) { .pros-cons-grid { grid-template-columns: 1fr; } }
+    .pill-card { padding: 0.75rem 1rem; border-radius: 10px; font-size: 0.88rem; line-height: 1.5; }
+    .pill-card.when-to-use { background: rgba(34, 197, 94, 0.08); border: 1px solid rgba(34, 197, 94, 0.25); color: #bbf7d0; }
+    .pill-card.when-to-avoid { background: rgba(244, 63, 94, 0.08); border: 1px solid rgba(244, 63, 94, 0.25); color: #fecdd3; }
+    .pill-card-title { font-size: 0.75rem; font-weight: 700; text-transform: uppercase; margin-bottom: 0.25rem; }
     .pill-card.when-to-use .pill-card-title { color: #4ade80; }
     .pill-card.when-to-avoid .pill-card-title { color: #fb7185; }
 
-    /* Code Block */
-    .code-block {
+    /* Code Block & Sandboxed Runner */
+    .code-block { 
       margin-top: 1.25rem; 
       background: var(--code-bg); 
-      border: 1px solid var(--border);
+      border: 1px solid var(--border); 
       border-radius: 10px; 
-      position: relative;
-      overflow: hidden;
+      overflow: hidden; 
     }
     .code-header { 
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      background: rgba(255, 255, 255, 0.03);
-      padding: 0.5rem 1rem;
+      display: flex; 
+      justify-content: space-between; 
+      align-items: center; 
+      background: rgba(255, 255, 255, 0.03); 
+      padding: 0.5rem 1rem; 
       border-bottom: 1px solid var(--border);
       font-size: 0.75rem; 
       color: var(--text-muted); 
       text-transform: uppercase; 
       font-weight: 700; 
-      letter-spacing: 0.5px;
     }
-    .btn-copy {
-      background: transparent;
-      border: none;
-      color: var(--accent);
+    .code-header-tools { display: flex; gap: 0.4rem; }
+    .btn-copy { background: transparent; border: none; color: var(--accent); cursor: pointer; font-size: 0.75rem; font-weight: 600; padding: 0.2rem 0.5rem; border-radius: 4px; }
+    .btn-copy:hover { background: rgba(56, 189, 248, 0.15); }
+    .btn-run-code {
+      background: rgba(34, 197, 94, 0.15);
+      border: 1px solid rgba(34, 197, 94, 0.4);
+      color: #4ade80;
       cursor: pointer;
       font-size: 0.75rem;
-      font-weight: 600;
-      padding: 0.2rem 0.5rem;
-      border-radius: 4px;
-      transition: background 0.2s;
-    }
-    .btn-copy:hover { background: rgba(56, 189, 248, 0.15); }
-    pre { padding: 1.1rem; overflow-x: auto; margin: 0; }
-    pre code { 
-      font-family: 'Fira Code', monospace; 
-      font-size: 0.88rem; 
-      color: #7dd3fc; 
-      white-space: pre-wrap; 
-      word-break: break-word; 
-      line-height: 1.5;
-    }
-
-    /* Not Found Box & Error Notices */
-    .not-found-box {
-      text-align: center; 
-      background: var(--card-bg); 
-      backdrop-filter: blur(16px);
-      border: 1px dashed var(--border);
-      border-radius: 16px; 
-      padding: 3rem 1.5rem; 
-      margin-top: 1rem;
-    }
-    .btn-search-web {
-      margin-top: 1.25rem; 
-      padding: 0.8rem 1.5rem; 
-      background: var(--accent-gradient);
-      color: #040813; 
-      border: none; 
-      border-radius: 10px; 
       font-weight: 700;
-      font-size: 0.95rem;
-      cursor: pointer; 
-      transition: all 0.25s;
-      box-shadow: 0 4px 15px rgba(56, 189, 248, 0.3);
+      padding: 0.2rem 0.6rem;
+      border-radius: 4px;
+      transition: all 0.2s;
     }
-    .btn-search-web:hover:not(:disabled) { 
-      transform: translateY(-2px);
-      box-shadow: 0 6px 20px rgba(56, 189, 248, 0.45);
+    .btn-run-code:hover { background: #22c55e; color: #040813; }
+    
+    pre[class*="language-"] { 
+      padding: 1.1rem; 
+      margin: 0; 
+      background: transparent !important;
+      border: none !important;
+      box-shadow: none !important;
+      overflow-x: auto; 
     }
-    .btn-search-web:disabled {
-      opacity: 0.6;
-      cursor: not-allowed;
-      transform: none;
-      box-shadow: none;
-    }
-    .spinner { display: inline-block; margin-top: 1.25rem; color: var(--accent); font-weight: 600; }
-    .quota-box {
-      margin-top: 1.25rem;
-      background: rgba(251, 191, 36, 0.12);
-      border: 1px solid rgba(251, 191, 36, 0.35);
-      border-radius: 10px;
-      padding: 0.9rem 1.2rem;
-      color: #fde68a;
-      font-size: 0.92rem;
-      line-height: 1.5;
-      display: inline-block;
-      max-width: 600px;
+    code[class*="language-"] { 
+      font-family: 'Fira Code', monospace !important; 
+      font-size: 0.88rem !important; 
+      line-height: 1.55 !important;
+      text-shadow: none !important;
     }
 
-    /* Footer */
-    footer {
-      margin-top: 3.5rem; 
-      padding: 1.75rem 0 1rem 0; 
-      text-align: center;
-      border-top: 1px solid var(--border); 
-      width: 100%; 
-      max-width: 950px;
+    /* Sandbox Console Output */
+    .code-runner-console {
+      display: none;
+      background: #04060a;
+      border-top: 1px solid rgba(56, 189, 248, 0.3);
+      padding: 0.9rem 1.1rem;
+      font-family: 'Fira Code', monospace;
+      font-size: 0.82rem;
+      line-height: 1.5;
+      color: #7dd3fc;
+      animation: fadeIn 0.2s ease;
     }
-    .brand-attribution { 
-      font-size: 0.9rem; 
-      color: var(--text-muted); 
-      letter-spacing: 0.4px; 
-      margin-bottom: 0.4rem; 
+    .console-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      color: #94a3b8;
+      font-size: 0.72rem;
+      font-weight: 700;
+      margin-bottom: 0.5rem;
+      text-transform: uppercase;
     }
+    .console-clear-btn {
+      background: transparent;
+      border: none;
+      color: #f43f5e;
+      cursor: pointer;
+      font-size: 0.7rem;
+      font-weight: 600;
+    }
+    .console-clear-btn:hover { text-decoration: underline; }
+    .console-output-text { white-space: pre-wrap; word-break: break-word; }
+
+    .not-found-box { text-align: center; background: var(--card-bg); backdrop-filter: blur(16px); border: 1px dashed var(--border); border-radius: 16px; padding: 3rem 1.5rem; margin-top: 1rem; }
+    .btn-search-web { margin-top: 1.25rem; padding: 0.8rem 1.5rem; background: var(--accent-gradient); color: #040813; border: none; border-radius: 10px; font-weight: 700; font-size: 0.95rem; cursor: pointer; transition: all 0.25s; box-shadow: 0 4px 15px rgba(56, 189, 248, 0.3); }
+    .btn-search-web:hover:not(:disabled) { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(56, 189, 248, 0.45); }
+    .btn-search-web:disabled { opacity: 0.6; cursor: not-allowed; }
+    .spinner { display: inline-block; margin-top: 1.25rem; color: var(--accent); font-weight: 600; }
+    .quota-box { margin-top: 1.25rem; background: rgba(251, 191, 36, 0.12); border: 1px solid rgba(251, 191, 36, 0.35); border-radius: 10px; padding: 0.9rem 1.2rem; color: #fde68a; font-size: 0.92rem; line-height: 1.5; display: inline-block; max-width: 600px; }
+
+    .did-you-mean-box { background: rgba(56, 189, 248, 0.12); border: 1px solid rgba(56, 189, 248, 0.4); border-radius: 12px; padding: 0.9rem 1.25rem; margin-bottom: 1.25rem; display: flex; align-items: center; gap: 0.5rem; font-size: 0.95rem; color: #cbd5e1; animation: fadeIn 0.2s ease; }
+    .did-you-mean-link { color: var(--accent); font-weight: 700; text-decoration: underline; cursor: pointer; }
+
+    .fav-meta-box { margin-top: 1.25rem; background: rgba(15, 23, 42, 0.7); border: 1px solid var(--border); border-radius: 10px; padding: 1rem; }
+    .fav-meta-row { display: flex; gap: 0.75rem; align-items: center; margin-bottom: 0.75rem; flex-wrap: wrap; }
+    .fav-select { background: var(--code-bg); border: 1px solid var(--border); color: var(--text); padding: 0.45rem 0.75rem; border-radius: 8px; font-size: 0.85rem; outline: none; cursor: pointer; }
+    .notes-textarea { width: 100%; background: var(--code-bg); border: 1px solid var(--border); color: var(--text); padding: 0.75rem; border-radius: 8px; font-size: 0.9rem; resize: vertical; min-height: 60px; outline: none; }
+
+    footer { margin-top: 3.5rem; padding: 1.75rem 0 1rem 0; text-align: center; border-top: 1px solid var(--border); width: 100%; max-width: 950px; }
+    .brand-attribution { font-size: 0.9rem; color: var(--text-muted); letter-spacing: 0.4px; margin-bottom: 0.4rem; }
     .brand-highlight { color: var(--accent); font-weight: 800; }
     .brand-author { color: #f8fafc; font-weight: 600; }
     .brand-rights { font-size: 0.78rem; color: #64748b; }
@@ -863,18 +866,15 @@
     @keyframes fadeIn { from { opacity: 0; transform: translateY(-5px); } to { opacity: 1; transform: translateY(0); } }
     @keyframes pulse { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.15); } }
 
-    /* Stampa / PDF */
     @media print {
       body { background: white !important; color: black !important; padding: 0; }
-      .header-actions, .tools-bar, .search-box, .categories-bar, .view-toggle, .btn-card-tool, .btn-copy, .btn-delete, footer { display: none !important; }
+      .header-actions, .tools-bar, .search-box, .categories-bar, .view-toggle, .btn-card-tool, .btn-copy, .btn-run-code, .btn-delete, footer, .podcast-floating-player, .code-runner-console { display: none !important; }
       .term-card { background: white !important; border: 1px solid #ccc !important; box-shadow: none !important; break-inside: avoid; margin-bottom: 2rem; }
       .term-card h2 { color: #0284c7 !important; }
       .usecase-box { background: #f8fafc !important; border-left: 3px solid #0284c7 !important; color: #0f172a !important; }
       .usecase-text { color: #0f172a !important; }
       .code-block { background: #f1f5f9 !important; border: 1px solid #e2e8f0 !important; }
       pre code { color: #0f172a !important; }
-      .pill-card.when-to-use { background: #f0fdf4 !important; color: #166534 !important; border: 1px solid #bbf7d0 !important; }
-      .pill-card.when-to-avoid { background: #fff1f2 !important; color: #9f1239 !important; border: 1px solid #fecdd3 !important; }
     }
   </style>
 </head>
@@ -885,7 +885,7 @@
     <div class="header-titles">
       <div class="title-row">
         <h1>DevLexicon</h1>
-        <span class="version-pill">v2.5.1</span>
+        <span class="version-pill">v2.9.0 Code Runner</span>
       </div>
       <p>Enciclopedia Tecnica Cloud &amp; Auto-Apprendimento AI</p>
     </div>
@@ -897,8 +897,6 @@
 
   <!-- Pannello Impostazioni Avanzate -->
   <div class="settings-panel" id="settingsPanel">
-    
-    <!-- Chiave Gemini -->
     <div class="settings-section-title">
       <span>🔑 Chiave API Gemini Cloud</span>
     </div>
@@ -907,7 +905,6 @@
       <button class="btn-action" onclick="saveCloudApiKey()">Salva Chiave</button>
     </div>
 
-    <!-- Modulo Configurazione Audio Vocale Setup -->
     <div class="settings-section-title">
       <span>🔊 Configurazione Sintesi Vocale</span>
       <button class="btn-action" id="btnTestAudio" style="font-size: 0.78rem; padding: 0.3rem 0.6rem;" onclick="testVoiceAudio(this)">▶ Prova Audio</button>
@@ -935,20 +932,20 @@
         </div>
       </div>
     </div>
-
   </div>
 
-  <!-- Barra Info, Import, PDF & Backup -->
+  <!-- Barra Info, Import, Podcast, PDF & Backup -->
   <div class="tools-bar">
     <div>
       <span id="termCount">Caricamento in corso...</span>
       <span class="sync-badge" id="syncStatus"> ● Cloud Connesso</span>
     </div>
     <div class="tools-buttons">
+      <button class="btn-action btn-podcast" onclick="startPodcastMode()" title="Ascolta tutti i concetti della categoria in sequenza">🎧 Modalità Podcast</button>
       <button class="btn-action btn-import" onclick="document.getElementById('importFile').click()">📂 Importa JSON</button>
       <input type="file" id="importFile" accept=".json" style="display: none;" onchange="importDataToCloud(event)">
       <button class="btn-action btn-pdf" onclick="window.print()" title="Stampa o salva come PDF">📄 Stampa / PDF</button>
-      <button class="btn-action" onclick="exportData()">💾 Backup Locale</button>
+      <button class="btn-action" onclick="exportData()">💾 Backup</button>
     </div>
   </div>
 
@@ -962,26 +959,36 @@
   <!-- Categorie Dinamiche & Preferiti Avanzati -->
   <div class="categories-bar" id="categoriesBar"></div>
 
-  <!-- Switch Modalità (visibile solo in ricerca normale) -->
+  <!-- Switch Modalità -->
   <div class="view-toggle" id="viewToggleBox">
     <button class="btn-toggle active" id="btnSummary" onclick="setViewMode('summary')">Modalità Sintetica</button>
     <button class="btn-toggle" id="btnDetail" onclick="setViewMode('detail')">Modalità Dettagliata (con Codice &amp; Scenari)</button>
   </div>
 
-  <!-- Suggerimento "Forse cercavi" -->
   <div id="didYouMeanContainer"></div>
-
-  <!-- Risultati / Moduli Studio & Quiz -->
   <div id="termsList"></div>
 </div>
 
-<!-- Footer -->
+<!-- Player Galleggiante Podcast Mode (Sticky) -->
+<div class="podcast-floating-player" id="podcastPlayer">
+  <div class="player-track-info">
+    <div class="player-track-title" id="playerTrackTitle">In riproduzione: --</div>
+    <div class="player-track-sub" id="playerTrackSub">Traccia 0 di 0 • Pausa tra tracce: 2s</div>
+  </div>
+  <div class="player-controls">
+    <button class="btn-player" onclick="podcastPrev()" title="Precedente">⏮️</button>
+    <button class="btn-player play-btn" id="btnPodcastPlayPause" onclick="podcastTogglePlayPause()" title="Play / Pausa">⏸️</button>
+    <button class="btn-player" onclick="podcastNext()" title="Successivo">⏭️</button>
+    <button class="btn-player close-btn" onclick="stopPodcastMode()" title="Chiudi Podcast">✖</button>
+  </div>
+</div>
+
 <footer>
   <div class="brand-attribution">
     Software Engineered &amp; Designed by: <span class="brand-highlight">GC CodeLab</span> • <span class="brand-author">Giovanni Cavallo</span>
   </div>
   <div class="brand-rights">
-    © <span id="currentYear"></span> DevLexicon • Tutti i diritti riservati • <span class="footer-version">v2.5.1 Interactive Pro</span>
+    © <span id="currentYear"></span> DevLexicon • Tutti i diritti riservati • <span class="footer-version">v2.9.0 Code Runner Interactive Pro</span>
   </div>
 </footer>
 
@@ -1011,37 +1018,47 @@
   let favorites = JSON.parse(localStorage.getItem('devlex_favorites') || '[]');
   let favFolders = JSON.parse(localStorage.getItem('devlex_fav_folders') || '{}');
   let favNotes = JSON.parse(localStorage.getItem('devlex_fav_notes') || '{}');
-  
+  let srsData = JSON.parse(localStorage.getItem('devlex_srs_data') || '{}');
+
   let activeGeminiKey = '';
   let currentMode = 'summary';
   let selectedCategory = 'ALL';
   let selectedFavFolder = 'ALL';
   let isEditMode = false;
   let retryCountdownTimer = null;
-  let currentFlashcardIndex = 0;
   
+  let currentFlashcardIndex = 0;
+  let currentFlashcardPool = [];
   let quizScore = 0;
   let currentQuizData = null;
 
-  // --- MOTORE VOCALE OTTIMIZZATO ---
+  // --- PODCAST MODE STATE ---
+  let isPodcastRunning = false;
+  let isPodcastPaused = false;
+  let podcastPool = [];
+  let podcastCurrentIndex = 0;
+  let podcastTimer = null;
+
+  // --- SHOWDOWN STATE ---
+  let showdownTermA = '';
+  let showdownTermB = '';
+
+  // --- MOTORE VOCALE ---
   let allSystemVoices = [];
   let currentVoiceGenderFilter = localStorage.getItem('devlex_voice_filter') || 'female';
   let currentlyPlayingBtn = null;
   let lastSpokenText = '';
   let sliderDebounceTimer = null;
-
   const testAudioPhrase = "Questa è la voce configurata per la tua enciclopedia tecnica DevLexicon.";
 
   function populateVoiceList() {
     if (!('speechSynthesis' in window)) return;
     allSystemVoices = window.speechSynthesis.getVoices() || [];
-
     const voiceSelect = document.getElementById('voiceSelect');
     if (!voiceSelect) return;
     
     const previousSelection = voiceSelect.value || localStorage.getItem('devlex_selected_voice');
     voiceSelect.innerHTML = '';
-
     if (allSystemVoices.length === 0) return;
 
     let itVoices = allSystemVoices.filter(v => v.lang && (v.lang.startsWith('it') || v.lang.startsWith('IT')));
@@ -1051,7 +1068,6 @@
       const nameLower = (v.name || '').toLowerCase();
       const isMale = nameLower.includes('cosimo') || nameLower.includes('maschile') || nameLower.includes('male') || nameLower.includes('diego') || nameLower.includes('giorgio');
       const isFemale = !isMale;
-
       if (currentVoiceGenderFilter === 'female') return isFemale;
       if (currentVoiceGenderFilter === 'male') return isMale;
       return true;
@@ -1103,7 +1119,6 @@
     const pitchEl = document.getElementById('pitchRange');
     const rateValEl = document.getElementById('rateVal');
     const pitchValEl = document.getElementById('pitchVal');
-
     if (rateEl && rateValEl) rateValEl.textContent = `${parseFloat(rateEl.value).toFixed(2)}x`;
     if (pitchEl && pitchValEl) pitchValEl.textContent = parseFloat(pitchEl.value).toFixed(2);
   }
@@ -1112,10 +1127,7 @@
     const voiceSelect = document.getElementById('voiceSelect');
     const rateEl = document.getElementById('rateRange');
     const pitchEl = document.getElementById('pitchRange');
-
-    if (voiceSelect && voiceSelect.value) {
-      localStorage.setItem('devlex_selected_voice', voiceSelect.value);
-    }
+    if (voiceSelect && voiceSelect.value) localStorage.setItem('devlex_selected_voice', voiceSelect.value);
     if (rateEl) localStorage.setItem('devlex_voice_rate', rateEl.value);
     if (pitchEl) localStorage.setItem('devlex_voice_pitch', pitchEl.value);
   }
@@ -1123,9 +1135,7 @@
   function onVoiceParamsChanged(immediate = false) {
     updateSlidersLive();
     saveVoicePreference();
-
     if (!('speechSynthesis' in window) || !window.speechSynthesis.speaking || !currentlyPlayingBtn) return;
-
     if (sliderDebounceTimer) clearTimeout(sliderDebounceTimer);
 
     if (immediate) {
@@ -1184,10 +1194,8 @@
     const q = query.toLowerCase();
     const t = target.toLowerCase();
     if (t.includes(q)) return 1.0;
-
     const words = t.split(/[\s\-()/,]+/);
     let bestScore = 0;
-
     for (const word of words) {
       if (!word) continue;
       const dist = getLevenshteinDistance(q, word);
@@ -1195,7 +1203,6 @@
       const similarity = 1 - dist / maxLen;
       if (similarity > bestScore) bestScore = similarity;
     }
-
     return bestScore;
   }
 
@@ -1218,9 +1225,7 @@
     const panel = document.getElementById('settingsPanel');
     if (!panel) return;
     panel.classList.toggle('open');
-    if (panel.classList.contains('open')) {
-      populateVoiceList();
-    }
+    if (panel.classList.contains('open')) populateVoiceList();
   }
 
   function toggleFavorite(termId) {
@@ -1250,13 +1255,13 @@
     localStorage.setItem('devlex_fav_notes', JSON.stringify(favNotes));
   }
 
-  function speakTerm(btn, textToSpeak) {
+  function speakTerm(btn, textToSpeak, onEndCallback = null) {
     if (!('speechSynthesis' in window)) {
       alert('La sintesi vocale non è supportata dal tuo browser.');
       return;
     }
 
-    if (window.speechSynthesis.speaking && currentlyPlayingBtn === btn) {
+    if (window.speechSynthesis.speaking && currentlyPlayingBtn === btn && !isPodcastRunning) {
       window.speechSynthesis.cancel();
       if (btn) {
         btn.classList.remove('speaking');
@@ -1282,15 +1287,10 @@
 
     const utterance = new SpeechSynthesisUtterance(cleanText);
     utterance.lang = 'it-IT';
+    utterance.rate = parseFloat(localStorage.getItem('devlex_voice_rate') || '0.90');
+    utterance.pitch = parseFloat(localStorage.getItem('devlex_voice_pitch') || '1.00');
 
-    const currentRate = parseFloat(localStorage.getItem('devlex_voice_rate') || '0.90');
-    const currentPitch = parseFloat(localStorage.getItem('devlex_voice_pitch') || '1.00');
-    utterance.rate = currentRate;
-    utterance.pitch = currentPitch;
-
-    if (allSystemVoices.length === 0) {
-      allSystemVoices = window.speechSynthesis.getVoices() || [];
-    }
+    if (allSystemVoices.length === 0) allSystemVoices = window.speechSynthesis.getVoices() || [];
     const targetVoiceName = localStorage.getItem('devlex_selected_voice') || (document.getElementById('voiceSelect') ? document.getElementById('voiceSelect').value : '');
     if (targetVoiceName && allSystemVoices.length > 0) {
       const match = allSystemVoices.find(v => v.name === targetVoiceName);
@@ -1299,27 +1299,147 @@
 
     if (btn) {
       currentlyPlayingBtn = btn;
-      utterance.onstart = () => {
-        btn.classList.add('speaking');
-        btn.title = "Clicca per interrompere l'audio";
+      utterance.onstart = () => { btn.classList.add('speaking'); btn.title = "Clicca per interrompere"; };
+      utterance.onend = () => { 
+        btn.classList.remove('speaking'); 
+        btn.title = "Ascolta spiegazione vocale"; 
+        currentlyPlayingBtn = null; 
+        lastSpokenText = ''; 
+        if (onEndCallback) onEndCallback();
       };
-      utterance.onend = () => {
-        btn.classList.remove('speaking');
-        btn.title = "Ascolta spiegazione vocale";
-        currentlyPlayingBtn = null;
-        lastSpokenText = '';
+      utterance.onerror = () => { 
+        btn.classList.remove('speaking'); 
+        btn.title = "Ascolta spiegazione vocale"; 
+        currentlyPlayingBtn = null; 
+        lastSpokenText = ''; 
+        if (onEndCallback) onEndCallback();
       };
-      utterance.onerror = () => {
-        btn.classList.remove('speaking');
-        btn.title = "Ascolta spiegazione vocale";
-        currentlyPlayingBtn = null;
-        lastSpokenText = '';
-      };
+    } else {
+      utterance.onend = () => { if (onEndCallback) onEndCallback(); };
+      utterance.onerror = () => { if (onEndCallback) onEndCallback(); };
     }
 
     window.speechSynthesis.speak(utterance);
   }
 
+  // --- PODCAST MODE ---
+  function getActiveFilterPool() {
+    if (selectedCategory === 'FAVORITES') {
+      let pool = glossary.filter(item => favorites.includes(item._fbKey));
+      if (selectedFavFolder !== 'ALL') {
+        pool = pool.filter(item => (favFolders[item._fbKey] || 'Generale') === selectedFavFolder);
+      }
+      return pool;
+    }
+    if (selectedCategory === 'ALL' || selectedCategory === 'STUDY_MODE' || selectedCategory === 'QUIZ_MODE' || selectedCategory === 'SHOWDOWN_MODE') {
+      return glossary;
+    }
+    return glossary.filter(item => item.category === selectedCategory);
+  }
+
+  function startPodcastMode() {
+    podcastPool = getActiveFilterPool();
+    if (podcastPool.length === 0) {
+      alert('Nessun concetto disponibile in questa sezione per il Podcast.');
+      return;
+    }
+
+    if (selectedCategory === 'STUDY_MODE' || selectedCategory === 'QUIZ_MODE' || selectedCategory === 'SHOWDOWN_MODE') {
+      setCategory('ALL');
+    }
+
+    isPodcastRunning = true;
+    isPodcastPaused = false;
+    podcastCurrentIndex = 0;
+
+    const player = document.getElementById('podcastPlayer');
+    if (player) player.classList.add('active');
+
+    playPodcastTrack();
+  }
+
+  function playPodcastTrack() {
+    if (!isPodcastRunning || podcastPool.length === 0) return;
+    if (podcastCurrentIndex >= podcastPool.length) podcastCurrentIndex = 0;
+    if (podcastCurrentIndex < 0) podcastCurrentIndex = podcastPool.length - 1;
+
+    const item = podcastPool[podcastCurrentIndex];
+    
+    const titleEl = document.getElementById('playerTrackTitle');
+    const subEl = document.getElementById('playerTrackSub');
+    const btnPlayPause = document.getElementById('btnPodcastPlayPause');
+
+    if (titleEl) titleEl.textContent = `In riproduzione: ${item.term}`;
+    if (subEl) subEl.textContent = `Traccia ${podcastCurrentIndex + 1} di ${podcastPool.length} • [${item.category || 'Generale'}]`;
+    if (btnPlayPause) btnPlayPause.textContent = '⏸️';
+
+    document.querySelectorAll('.term-card').forEach(c => c.classList.remove('podcast-active'));
+    const cardEl = document.getElementById(`card_${item._fbKey}`);
+    if (cardEl) {
+      cardEl.classList.add('podcast-active');
+      cardEl.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }
+
+    const textToRead = `${item.term}. ${item.summary}. ${item.useCase ? 'Scenario pratico: ' + item.useCase : ''}`;
+
+    if (podcastTimer) clearTimeout(podcastTimer);
+
+    speakTerm(null, textToRead, () => {
+      if (!isPodcastRunning || isPodcastPaused) return;
+      podcastTimer = setTimeout(() => {
+        if (isPodcastRunning && !isPodcastPaused) {
+          podcastCurrentIndex++;
+          playPodcastTrack();
+        }
+      }, 2500);
+    });
+  }
+
+  function podcastTogglePlayPause() {
+    if (!isPodcastRunning) return;
+    const btnPlayPause = document.getElementById('btnPodcastPlayPause');
+    
+    if (window.speechSynthesis.speaking && !isPodcastPaused) {
+      window.speechSynthesis.pause();
+      isPodcastPaused = true;
+      if (btnPlayPause) btnPlayPause.textContent = '▶️';
+    } else if (isPodcastPaused) {
+      window.speechSynthesis.resume();
+      isPodcastPaused = false;
+      if (btnPlayPause) btnPlayPause.textContent = '⏸️';
+    }
+  }
+
+  function podcastNext() {
+    if (!isPodcastRunning) return;
+    if (podcastTimer) clearTimeout(podcastTimer);
+    window.speechSynthesis.cancel();
+    isPodcastPaused = false;
+    podcastCurrentIndex = (podcastCurrentIndex + 1) % podcastPool.length;
+    playPodcastTrack();
+  }
+
+  function podcastPrev() {
+    if (!isPodcastRunning) return;
+    if (podcastTimer) clearTimeout(podcastTimer);
+    window.speechSynthesis.cancel();
+    isPodcastPaused = false;
+    podcastCurrentIndex = (podcastCurrentIndex - 1 + podcastPool.length) % podcastPool.length;
+    playPodcastTrack();
+  }
+
+  function stopPodcastMode() {
+    isPodcastRunning = false;
+    isPodcastPaused = false;
+    if (podcastTimer) clearTimeout(podcastTimer);
+    window.speechSynthesis.cancel();
+
+    const player = document.getElementById('podcastPlayer');
+    if (player) player.classList.remove('active');
+    document.querySelectorAll('.term-card').forEach(c => c.classList.remove('podcast-active'));
+  }
+
+  // --- FIREBASE SYNC ---
   db.ref('settings/gemini_api_key').on('value', (snapshot) => {
     const keyVal = snapshot.val();
     if (keyVal) {
@@ -1334,16 +1454,15 @@
 
   db.ref('dev_lexicon_terms').on('value', (snapshot) => {
     const data = snapshot.val();
-    if (data) {
-      glossary = Object.keys(data).map(key => ({ _fbKey: key, ...data[key] }));
-    } else {
-      glossary = [];
-    }
+    glossary = data ? Object.keys(data).map(key => ({ _fbKey: key, ...data[key] })) : [];
     renderCategories();
     if (selectedCategory === 'STUDY_MODE') {
+      setupFlashcardPool();
       renderStudyMode();
     } else if (selectedCategory === 'QUIZ_MODE') {
       generateNewQuiz();
+    } else if (selectedCategory === 'SHOWDOWN_MODE') {
+      renderShowdownMode();
     } else {
       renderTerms(document.getElementById('searchInput').value);
     }
@@ -1393,6 +1512,20 @@
     renderTerms(document.getElementById('searchInput').value);
   }
 
+  function countDueSrsCards() {
+    const now = Date.now();
+    let dueCount = 0;
+    if (!glossary || glossary.length === 0) return 0;
+
+    glossary.forEach(item => {
+      const srs = srsData[item._fbKey];
+      if (!srs || !srs.nextReview || srs.nextReview <= now) {
+        dueCount++;
+      }
+    });
+    return dueCount;
+  }
+
   function setCategory(cat, folder = 'ALL') {
     selectedCategory = cat;
     selectedFavFolder = folder;
@@ -1402,6 +1535,7 @@
       document.getElementById('searchSection').style.display = 'none';
       document.getElementById('viewToggleBox').style.display = 'none';
       document.getElementById('didYouMeanContainer').innerHTML = '';
+      setupFlashcardPool();
       renderStudyMode();
     } else if (cat === 'QUIZ_MODE') {
       document.getElementById('searchSection').style.display = 'none';
@@ -1409,6 +1543,11 @@
       document.getElementById('didYouMeanContainer').innerHTML = '';
       quizScore = 0;
       generateNewQuiz();
+    } else if (cat === 'SHOWDOWN_MODE') {
+      document.getElementById('searchSection').style.display = 'none';
+      document.getElementById('viewToggleBox').style.display = 'none';
+      document.getElementById('didYouMeanContainer').innerHTML = '';
+      renderShowdownMode();
     } else {
       document.getElementById('searchSection').style.display = 'block';
       document.getElementById('viewToggleBox').style.display = 'flex';
@@ -1417,6 +1556,9 @@
   }
 
   function renderCategories() {
+    const dueCount = countDueSrsCards();
+    const srsLabel = dueCount > 0 ? `🧠 Ripasso SRS (${dueCount} da fare)` : `🧠 Ripasso SRS (0 in sospeso 🎉)`;
+
     let categoriesHtml = `
       <button class="cat-filter-btn ${selectedCategory === 'ALL' ? 'active' : ''}" onclick="setCategory('ALL')">Tutte le Categorie</button>
       <button class="cat-filter-btn favorites-btn ${selectedCategory === 'FAVORITES' && selectedFavFolder === 'ALL' ? 'active' : ''}" onclick="setCategory('FAVORITES', 'ALL')">⭐ Preferiti (${favorites.length})</button>
@@ -1434,8 +1576,11 @@
     }
 
     categoriesHtml += `
-      <button class="cat-filter-btn study-mode-btn ${selectedCategory === 'STUDY_MODE' ? 'active' : ''}" onclick="setCategory('STUDY_MODE')">🎮 Modalità Flashcard</button>
+      <button class="cat-filter-btn study-mode-btn ${selectedCategory === 'STUDY_MODE' ? 'active' : ''}" onclick="setCategory('STUDY_MODE')">
+        ${srsLabel}
+      </button>
       <button class="cat-filter-btn quiz-mode-btn ${selectedCategory === 'QUIZ_MODE' ? 'active' : ''}" onclick="setCategory('QUIZ_MODE')">🎯 Sfida Multipla</button>
+      <button class="cat-filter-btn showdown-mode-btn ${selectedCategory === 'SHOWDOWN_MODE' ? 'active' : ''}" onclick="setCategory('SHOWDOWN_MODE')">⚔️ Tech Showdown (A vs B)</button>
     `;
 
     const standardCats = [...new Set(glossary.map(item => item.category || 'Generale'))];
@@ -1447,7 +1592,8 @@
       `;
     });
 
-    categoriesBarElement.innerHTML = categoriesHtml;
+    const categoriesBar = document.getElementById('categoriesBar');
+    if (categoriesBar) categoriesBar.innerHTML = categoriesHtml;
   }
 
   function deleteTerm(fbKey, termName) {
@@ -1462,6 +1608,59 @@
       btn.textContent = '✓ Copiato!';
       setTimeout(() => btn.textContent = originalText, 2000);
     });
+  }
+
+  // --- SANDBOXED CODE RUNNER ---
+  function detectCodeLanguage(code) {
+    if (!code) return 'javascript';
+    const c = code.trim().toLowerCase();
+    if (c.startsWith('select ') || c.startsWith('create ') || c.startsWith('insert ') || c.includes('from ') || c.includes('where ')) return 'sql';
+    if (c.startsWith('docker ') || c.startsWith('kubectl ') || c.startsWith('npm ') || c.startsWith('git ') || c.startsWith('curl ')) return 'bash';
+    if (c.startsWith('{') || c.startsWith('[')) return 'json';
+    if (c.includes('def ') || c.includes('import ') && c.includes(':')) return 'python';
+    return 'javascript';
+  }
+
+  function runCodeSnippet(termKey, rawCodeEncoded) {
+    const code = decodeURIComponent(rawCodeEncoded);
+    const consoleBox = document.getElementById(`console_${termKey}`);
+    const consoleText = document.getElementById(`console_text_${termKey}`);
+    
+    if (!consoleBox || !consoleText) return;
+    
+    consoleBox.style.display = 'block';
+    consoleText.innerHTML = `<span style="color:#94a3b8;">⚙️ Esecuzione in corso nella sandbox...</span>`;
+
+    const logs = [];
+    const customConsole = {
+      log: (...args) => logs.push(args.map(a => typeof a === 'object' ? JSON.stringify(a, null, 2) : String(a)).join(' ')),
+      warn: (...args) => logs.push('⚠️ ' + args.map(a => String(a)).join(' ')),
+      error: (...args) => logs.push('❌ ' + args.map(a => String(a)).join(' ')),
+      info: (...args) => logs.push('ℹ️ ' + args.map(a => String(a)).join(' '))
+    };
+
+    setTimeout(() => {
+      try {
+        // Sandboxing con Function constructor isolato
+        const runFn = new Function('console', code);
+        const result = runFn(customConsole);
+        
+        let output = logs.join('\n');
+        if (result !== undefined) {
+          output += (output ? '\n' : '') + `↳ Ritorno: ${typeof result === 'object' ? JSON.stringify(result, null, 2) : result}`;
+        }
+        
+        if (!output) output = '✓ Esecuzione completata con successo (nessun log prodotto).';
+        consoleText.textContent = output;
+      } catch (err) {
+        consoleText.innerHTML = `<span style="color:#f43f5e; font-weight:700;">Errore Runtime:</span> ${escapeHtml(err.message)}`;
+      }
+    }, 50);
+  }
+
+  function clearCodeConsole(termKey) {
+    const consoleBox = document.getElementById(`console_${termKey}`);
+    if (consoleBox) consoleBox.style.display = 'none';
   }
 
   function selectSuggestion(suggestedTerm) {
@@ -1480,46 +1679,271 @@
     a.remove();
   }
 
-  function getStudyPool() {
-    if (selectedCategory === 'FAVORITES') {
-      let pool = glossary.filter(item => favorites.includes(item._fbKey));
-      if (selectedFavFolder !== 'ALL') {
-        pool = pool.filter(item => (favFolders[item._fbKey] || 'Generale') === selectedFavFolder);
-      }
-      return pool;
-    }
-    return glossary;
+  // --- LOGICA TECH SHOWDOWN ---
+  function renderShowdownMode() {
+    const listContainer = document.getElementById('termsList');
+    
+    if (!showdownTermA && glossary.length > 0) showdownTermA = glossary[0].term;
+    if (!showdownTermB && glossary.length > 1) showdownTermB = glossary[1].term;
+
+    const datalistOptions = glossary.map(i => `<option value="${escapeHtml(i.term)}">`).join('');
+
+    listContainer.innerHTML = `
+      <div class="showdown-wrapper">
+        <div class="showdown-header">
+          <h2>⚔️ Tech Showdown • Confronto Diretto Architetturale</h2>
+          <p>Scrivi o seleziona due tecnologie per confrontarle istantaneamente o generare il verdetto con AI.</p>
+        </div>
+
+        <datalist id="termsDatalist">
+          ${datalistOptions}
+        </datalist>
+
+        <div class="showdown-controls-grid">
+          <div class="showdown-select-col">
+            <label>Tecnologia / Concetto A:</label>
+            <input type="text" list="termsDatalist" id="inputShowdownA" class="showdown-search-input" value="${escapeHtml(showdownTermA)}" placeholder="Cerca o scrivi termine A (es. PostgreSQL)..." oninput="onShowdownInputChange('A', this.value)">
+          </div>
+
+          <div class="vs-badge-separator">VS</div>
+
+          <div class="showdown-select-col">
+            <label>Tecnologia / Concetto B:</label>
+            <input type="text" list="termsDatalist" id="inputShowdownB" class="showdown-search-input" value="${escapeHtml(showdownTermB)}" placeholder="Cerca o scrivi termine B (es. MongoDB)..." oninput="onShowdownInputChange('B', this.value)">
+          </div>
+        </div>
+
+        <div class="showdown-actions-row">
+          <button class="btn-action" style="font-size: 0.95rem; padding: 0.75rem 1.4rem;" onclick="renderShowdownResults()">📊 Confronta Schede Esistenti</button>
+          <button class="btn-showdown-ai" id="btnShowdownAI" onclick="generateAiShowdown()">⚡ Genera Verdetto AI &amp; Trade-off</button>
+        </div>
+
+        <div id="showdownResultsArea"></div>
+      </div>
+    `;
+
+    renderShowdownResults();
   }
 
-  // --- RENDER MODALITÀ FLASHCARD ---
-  function renderStudyMode() {
-    const listContainer = document.getElementById('termsList');
-    const pool = getStudyPool();
+  function onShowdownInputChange(side, value) {
+    if (side === 'A') {
+      showdownTermA = value.trim();
+    } else {
+      showdownTermB = value.trim();
+    }
+    renderShowdownResults();
+  }
 
-    if (pool.length === 0) {
-      listContainer.innerHTML = `<div class="not-found-box"><p>Nessun concetto disponibile in questa sezione per le Flashcard. Aggiungi qualche scheda ai Preferiti!</p></div>`;
+  function renderShowdownResults() {
+    const area = document.getElementById('showdownResultsArea');
+    if (!area) return;
+
+    const termA = (showdownTermA || '').trim();
+    const termB = (showdownTermB || '').trim();
+
+    const itemA = glossary.find(i => (i.term || '').toLowerCase() === termA.toLowerCase());
+    const itemB = glossary.find(i => (i.term || '').toLowerCase() === termB.toLowerCase());
+
+    if (!termA && !termB) {
+      area.innerHTML = `<p style="text-align:center; color:var(--text-muted); margin-top:1.5rem;">Digita o seleziona due concetti nei campi in alto per visualizzare il confronto.</p>`;
       return;
     }
 
-    if (currentFlashcardIndex >= pool.length) currentFlashcardIndex = 0;
-    const item = pool[currentFlashcardIndex];
+    area.innerHTML = `
+      <div class="showdown-comparison-grid">
+        <div class="showdown-col-card col-a">
+          <div class="showdown-col-title">${itemA ? escapeHtml(itemA.term) : escapeHtml(termA || 'Concetto A')}</div>
+          ${itemA ? `
+            <p class="text-content" style="margin-bottom:0.75rem;"><strong>Sintesi:</strong> ${escapeHtml(itemA.summary)}</p>
+            ${itemA.useCase ? `<p class="text-content" style="margin-bottom:0.75rem;"><strong>Scenario:</strong> ${escapeHtml(itemA.useCase)}</p>` : ''}
+            ${itemA.whenToUse ? `<p class="text-content" style="color:#bbf7d0; margin-bottom:0.5rem;"><strong>✅ Quando usarlo:</strong> ${escapeHtml(itemA.whenToUse)}</p>` : ''}
+            ${itemA.whenToAvoid ? `<p class="text-content" style="color:#fecdd3; margin-bottom:0.5rem;"><strong>⚠️ Quando evitarlo:</strong> ${escapeHtml(itemA.whenToAvoid)}</p>` : ''}
+            ${itemA.code ? `<div class="code-block"><pre><code class="language-${detectCodeLanguage(itemA.code)}">${escapeHtml(itemA.code)}</code></pre></div>` : ''}
+          ` : `<p style="color:var(--text-muted); font-size:0.9rem;">"${escapeHtml(termA || 'Questo termine')}" non è ancora presente nell'enciclopedia locale. Clicca sul pulsante <strong>"⚡ Genera Verdetto AI &amp; Trade-off"</strong> in alto per analizzarlo con Gemini!</p>`}
+        </div>
+
+        <div class="showdown-col-card col-b">
+          <div class="showdown-col-title">${itemB ? escapeHtml(itemB.term) : escapeHtml(termB || 'Concetto B')}</div>
+          ${itemB ? `
+            <p class="text-content" style="margin-bottom:0.75rem;"><strong>Sintesi:</strong> ${escapeHtml(itemB.summary)}</p>
+            ${itemB.useCase ? `<p class="text-content" style="margin-bottom:0.75rem;"><strong>Scenario:</strong> ${escapeHtml(itemB.useCase)}</p>` : ''}
+            ${itemB.whenToUse ? `<p class="text-content" style="color:#bbf7d0; margin-bottom:0.5rem;"><strong>✅ Quando usarlo:</strong> ${escapeHtml(itemA ? itemA.whenToUse : '')}</p>` : ''}
+            ${itemB.whenToAvoid ? `<p class="text-content" style="color:#fecdd3; margin-bottom:0.5rem;"><strong>⚠️ Quando evitarlo:</strong> ${escapeHtml(itemB.whenToAvoid)}</p>` : ''}
+            ${itemB.code ? `<div class="code-block"><pre><code class="language-${detectCodeLanguage(itemB.code)}">${escapeHtml(itemB.code)}</code></pre></div>` : ''}
+          ` : `<p style="color:var(--text-muted); font-size:0.9rem;">"${escapeHtml(termB || 'Questo termine')}" non è ancora presente nell'enciclopedia locale. Clicca sul pulsante <strong>"⚡ Genera Verdetto AI &amp; Trade-off"</strong> in alto per analizzarlo con Gemini!</p>`}
+        </div>
+      </div>
+    `;
+
+    if (window.Prism) Prism.highlightAll();
+  }
+
+  async function generateAiShowdown() {
+    const apiKey = activeGeminiKey || localStorage.getItem('gemini_api_key');
+    const area = document.getElementById('showdownResultsArea');
+    const btn = document.getElementById('btnShowdownAI');
+
+    const termA = (showdownTermA || '').trim();
+    const termB = (showdownTermB || '').trim();
+
+    if (!apiKey) {
+      alert('Chiave API non trovata. Clicca sull\'icona ⚙️ in alto a destra per inserirla.');
+      return;
+    }
+
+    if (!termA || !termB || termA.toLowerCase() === termB.toLowerCase()) {
+      alert('Digita o seleziona due tecnologie distinte da confrontare!');
+      return;
+    }
+
+    if (btn) btn.disabled = true;
+    area.innerHTML = `<div style="text-align:center; padding: 2rem;"><span class="spinner">⚡ Generazione Analisi Comparativa dei Trade-off tra ${escapeHtml(termA)} e ${escapeHtml(termB)} con Gemini...</span></div>`;
+
+    const prompt = `Effettua un'analisi comparativa approfondita e specialistica per sviluppatori senior e software architect confrontando "${termA}" VS "${termB}".
+Rispondi RIGOROSAMENTE ed ESCLUSIVAMENTE con un JSON valido (senza blocchi markdown \`\`\`json):
+{
+  "techA": {
+    "name": "${termA}",
+    "pros": "2 vantaggi architetturali chiave",
+    "cons": "2 svantaggi o limitazioni chiave",
+    "bestFor": "Scenario tipico ideale in cui scegliere A"
+  },
+  "techB": {
+    "name": "${termB}",
+    "pros": "2 vantaggi architetturali chiave",
+    "cons": "2 svantaggi o limitazioni chiave",
+    "bestFor": "Scenario tipico ideale in cui scegliere B"
+  },
+  "verdict": "Sintesi decisionale finale (3-4 frasi chiare per decidere tra A e B in un colloquio o in un progetto aziendale)."
+}`;
+
+    try {
+      const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-3.6-flash:generateContent?key=${apiKey}`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ contents: [{ parts: [{ text: prompt }] }] })
+      });
+
+      const data = await response.json();
+      if (data.error) throw new Error(data.error.message || JSON.stringify(data.error));
+
+      let rawText = data.candidates[0].content.parts[0].text;
+      const startIdx = rawText.indexOf('{');
+      const endIdx = rawText.lastIndexOf('}');
+      if (startIdx !== -1 && endIdx !== -1) {
+        rawText = rawText.slice(startIdx, endIdx + 1);
+      }
+
+      const showdown = JSON.parse(rawText);
+
+      area.innerHTML = `
+        <div class="showdown-comparison-grid">
+          <div class="showdown-col-card col-a">
+            <div class="showdown-col-title">${escapeHtml(showdown.techA.name)}</div>
+            <p class="text-content" style="color:#bbf7d0; margin-bottom:0.75rem;"><strong>✅ Punti di Forza:</strong><br>${escapeHtml(showdown.techA.pros)}</p>
+            <p class="text-content" style="color:#fecdd3; margin-bottom:0.75rem;"><strong>⚠️ Punti Deboli:</strong><br>${escapeHtml(showdown.techA.cons)}</p>
+            <p class="text-content" style="color:#7dd3fc;"><strong>🚀 Sceglilo se:</strong><br>${escapeHtml(showdown.techA.bestFor)}</p>
+          </div>
+
+          <div class="showdown-col-card col-b">
+            <div class="showdown-col-title">${escapeHtml(showdown.techB.name)}</div>
+            <p class="text-content" style="color:#bbf7d0; margin-bottom:0.75rem;"><strong>✅ Punti di Forza:</strong><br>${escapeHtml(showdown.techB.pros)}</p>
+            <p class="text-content" style="color:#fecdd3; margin-bottom:0.75rem;"><strong>⚠️ Punti Deboli:</strong><br>${escapeHtml(showdown.techB.cons)}</p>
+            <p class="text-content" style="color:#7dd3fc;"><strong>🚀 Sceglilo se:</strong><br>${escapeHtml(showdown.techB.bestFor)}</p>
+          </div>
+        </div>
+
+        <div class="showdown-verdict-box">
+          <div class="showdown-verdict-title">
+            <span>🏆 Verdetto Decisionale dell'Architetto</span>
+            <button class="btn-card-tool" title="Ascolta Verdetto" onclick="speakTerm(this, '${escapeHtml(showdown.verdict).replace(/'/g, "\\'")}')">🔊</button>
+          </div>
+          <p class="text-content" style="color:#f1f5f9;">${escapeHtml(showdown.verdict)}</p>
+        </div>
+      `;
+
+      if (btn) btn.disabled = false;
+
+    } catch (err) {
+      if (btn) btn.disabled = false;
+      area.innerHTML = `<p style="color:#ef4444; text-align:center; margin-top:1.5rem;">Errore durante la comparazione AI: ${escapeHtml(err.message)}</p>`;
+    }
+  }
+
+  // --- SRS LOGICA ---
+  function setupFlashcardPool() {
+    const now = Date.now();
+    let basePool = glossary;
+    if (selectedCategory === 'FAVORITES') {
+      basePool = glossary.filter(item => favorites.includes(item._fbKey));
+      if (selectedFavFolder !== 'ALL') {
+        basePool = basePool.filter(item => (favFolders[item._fbKey] || 'Generale') === selectedFavFolder);
+      }
+    }
+
+    currentFlashcardPool = [...basePool].sort((a, b) => {
+      const srsA = srsData[a._fbKey] || { nextReview: 0 };
+      const srsB = srsData[b._fbKey] || { nextReview: 0 };
+      return srsA.nextReview - srsB.nextReview;
+    });
+
+    currentFlashcardIndex = 0;
+  }
+
+  function renderStudyMode() {
+    const listContainer = document.getElementById('termsList');
+    if (currentFlashcardPool.length === 0) {
+      listContainer.innerHTML = `<div class="not-found-box"><p>Nessun concetto disponibile in questa sezione per le Flashcard.</p></div>`;
+      return;
+    }
+
+    if (currentFlashcardIndex >= currentFlashcardPool.length) currentFlashcardIndex = 0;
+
+    const item = currentFlashcardPool[currentFlashcardIndex];
+    const srs = srsData[item._fbKey] || { level: 0, nextReview: 0, reps: 0 };
+    const now = Date.now();
+    const isDue = !srs.nextReview || srs.nextReview <= now;
+    
+    let statusClass = isDue ? 'due' : (srs.level >= 3 ? 'mastered' : 'learning');
+    let statusText = isDue ? '🚨 Da ripassare' : (srs.level >= 3 ? '🌟 Padroneggiato' : `⏳ Tra ${Math.ceil((srs.nextReview - now)/(1000*60*60*24))} gg`);
+
     const speechText = `${item.term}. ${item.summary}`;
 
     listContainer.innerHTML = `
       <div class="flashcard-wrapper">
-        <div class="flashcard-category">Flashcard (${currentFlashcardIndex + 1} di ${pool.length}) • ${escapeHtml(item.category || 'Generale')}</div>
+        <div class="flashcard-header-stats">
+          <span class="category-badge">${escapeHtml(item.category || 'Generale')}</span>
+          <span class="srs-badge ${statusClass}">${statusText} (Liv. ${srs.level || 0})</span>
+          <span style="font-size:0.8rem; color:var(--text-muted);">Scheda ${currentFlashcardIndex + 1} di ${currentFlashcardPool.length}</span>
+        </div>
+
         <div class="flashcard-title">${escapeHtml(item.term)}</div>
         
         <div class="flashcard-hidden-content" id="flashcardContent">
           <p class="text-content" style="margin-bottom: 1rem;"><strong>Definizione:</strong> ${escapeHtml(item.summary)}</p>
-          ${item.useCase ? `<p class="text-content"><strong>Scenario:</strong> ${escapeHtml(item.useCase)}</p>` : ''}
+          ${item.useCase ? `<p class="text-content" style="margin-bottom: 0.75rem;"><strong>Scenario:</strong> ${escapeHtml(item.useCase)}</p>` : ''}
+          ${item.whenToUse ? `<p class="text-content" style="margin-bottom: 0.5rem; color:#bbf7d0;"><strong>Quando usarlo:</strong> ${escapeHtml(item.whenToUse)}</p>` : ''}
           ${favNotes[item._fbKey] ? `<p class="text-content" style="margin-top:0.75rem; color:#fde68a;"><strong>Nota Personale:</strong> ${escapeHtml(favNotes[item._fbKey])}</p>` : ''}
         </div>
 
-        <div>
+        <div id="flashcardActionsInitial">
           <button class="btn-reveal" onclick="revealFlashcard()">👁️ Mostra Soluzione</button>
-          <button class="btn-card-tool" style="padding: 0.8rem 1.2rem; font-size: 1rem; vertical-align: middle; margin-right: 0.5rem;" title="Ascolta" onclick="speakTerm(this, '${escapeHtml(speechText).replace(/'/g, "\\'")}')">🔊</button>
-          <button class="btn-next-card" onclick="nextFlashcard()">Prossima Scheda ➡️</button>
+          <button class="btn-card-tool" style="padding: 0.8rem 1.2rem; font-size: 1rem; vertical-align: middle;" title="Ascolta" onclick="speakTerm(this, '${escapeHtml(speechText).replace(/'/g, "\\'")}')">🔊</button>
+        </div>
+
+        <div class="srs-button-group" id="srsButtonGroup" style="display: none;">
+          <button class="btn-srs hard" onclick="processSrsGrade('${item._fbKey}', 'hard')">
+            🔴 Difficile
+            <span class="sub">&lt; 10 min (Ripeti ora)</span>
+          </button>
+          <button class="btn-srs good" onclick="processSrsGrade('${item._fbKey}', 'good')">
+            🟡 Buono
+            <span class="sub">+1-3 giorni</span>
+          </button>
+          <button class="btn-srs easy" onclick="processSrsGrade('${item._fbKey}', 'easy')">
+            🟢 Facile
+            <span class="sub">+5-10 giorni</span>
+          </button>
         </div>
       </div>
     `;
@@ -1527,26 +1951,51 @@
 
   function revealFlashcard() {
     const content = document.getElementById('flashcardContent');
-    if (content) content.classList.toggle('revealed');
+    const initialActions = document.getElementById('flashcardActionsInitial');
+    const srsGroup = document.getElementById('srsButtonGroup');
+    
+    if (content) content.classList.add('revealed');
+    if (initialActions) initialActions.style.display = 'none';
+    if (srsGroup) srsGroup.style.display = 'flex';
   }
 
-  function nextFlashcard() {
-    const pool = getStudyPool();
-    currentFlashcardIndex = (currentFlashcardIndex + 1) % pool.length;
+  function processSrsGrade(termKey, grade) {
+    const now = Date.now();
+    let srs = srsData[termKey] || { level: 0, nextReview: 0, reps: 0 };
+    const intervalsInDays = [1, 3, 7, 14, 30];
+    
+    if (grade === 'hard') {
+      srs.level = 0;
+      srs.nextReview = now + (10 * 60 * 1000);
+    } else if (grade === 'good') {
+      srs.level = Math.min(intervalsInDays.length - 1, (srs.level || 0) + 1);
+      const days = intervalsInDays[srs.level];
+      srs.nextReview = now + (days * 24 * 60 * 60 * 1000);
+      srs.reps = (srs.reps || 0) + 1;
+    } else if (grade === 'easy') {
+      srs.level = Math.min(intervalsInDays.length - 1, (srs.level || 0) + 2);
+      const days = intervalsInDays[srs.level];
+      srs.nextReview = now + (days * 24 * 60 * 60 * 1000);
+      srs.reps = (srs.reps || 0) + 1;
+    }
+
+    srsData[termKey] = srs;
+    localStorage.setItem('devlex_srs_data', JSON.stringify(srsData));
+    
+    currentFlashcardIndex = (currentFlashcardIndex + 1) % currentFlashcardPool.length;
+    renderCategories();
     renderStudyMode();
   }
 
-  // --- GENERATORE SFIDA MULTIPLA ---
+  // --- QUIZ MULTIPLO ---
   function generateNewQuiz() {
     const listContainer = document.getElementById('termsList');
-    const pool = getStudyPool();
-
-    if (pool.length < 3) {
-      listContainer.innerHTML = `<div class="not-found-box"><p>Servono almeno 3 concetti in questa sezione per generare le sfide a risposta multipla!</p></div>`;
+    if (glossary.length < 3) {
+      listContainer.innerHTML = `<div class="not-found-box"><p>Servono almeno 3 concetti per generare le sfide a risposta multipla!</p></div>`;
       return;
     }
 
-    const correctItem = pool[Math.floor(Math.random() * pool.length)];
+    const correctItem = glossary[Math.floor(Math.random() * glossary.length)];
     let distractors = glossary.filter(i => i.term !== correctItem.term);
     distractors.sort(() => 0.5 - Math.random());
     const selectedDistractors = distractors.slice(0, 2);
@@ -1572,7 +2021,7 @@
         </div>
 
         <div class="quiz-options-grid" id="quizOptionsGrid">
-          ${options.map((opt, idx) => `
+          ${options.map(opt => `
             <button class="quiz-option-btn" onclick="checkQuizAnswer(this, ${opt.isCorrect})">
               ${escapeHtml(opt.text)}
             </button>
@@ -1643,23 +2092,15 @@
       const termSummary = (item.summary || '').toLowerCase();
       const termDetail = (item.detail || '').toLowerCase();
 
-      if (termTitle === cleanQuery) {
-        exactMatches.push({ item, score: 100 });
-      } else if (termTitle.startsWith(cleanQuery)) {
-        exactMatches.push({ item, score: 80 });
-      } else if (termTitle.includes(cleanQuery)) {
-        exactMatches.push({ item, score: 60 });
-      } else if (termCategory.includes(cleanQuery)) {
-        exactMatches.push({ item, score: 40 });
-      } else if (termSummary.includes(cleanQuery)) {
-        exactMatches.push({ item, score: 20 });
-      } else if (termDetail.includes(cleanQuery)) {
-        exactMatches.push({ item, score: 10 });
-      } else {
+      if (termTitle === cleanQuery) exactMatches.push({ item, score: 100 });
+      else if (termTitle.startsWith(cleanQuery)) exactMatches.push({ item, score: 80 });
+      else if (termTitle.includes(cleanQuery)) exactMatches.push({ item, score: 60 });
+      else if (termCategory.includes(cleanQuery)) exactMatches.push({ item, score: 40 });
+      else if (termSummary.includes(cleanQuery)) exactMatches.push({ item, score: 20 });
+      else if (termDetail.includes(cleanQuery)) exactMatches.push({ item, score: 10 });
+      else {
         const sim = fuzzySimilarity(cleanQuery, item.term || '');
-        if (sim >= 0.58) {
-          fuzzyMatches.push({ item, score: sim * 100 });
-        }
+        if (sim >= 0.58) fuzzyMatches.push({ item, score: sim * 100 });
       }
     });
 
@@ -1672,7 +2113,6 @@
     if (fuzzyMatches.length > 0) {
       fuzzyMatches.sort((a, b) => b.score - a.score);
       const bestSuggestion = fuzzyMatches[0].item.term;
-
       didYouMeanContainer.innerHTML = `
         <div class="did-you-mean-box">
           <span>🔍 Nessun risultato esatto per "<strong>${escapeHtml(query)}</strong>". Forse cercavi:</span>
@@ -1710,9 +2150,10 @@
       const speechText = `${item.term}. ${item.summary}. ${item.useCase || ''}`;
       const currentFolder = favFolders[item._fbKey] || 'Generale';
       const currentNote = favNotes[item._fbKey] || '';
+      const codeLang = detectCodeLanguage(item.code);
 
       return `
-        <div class="term-card">
+        <div class="term-card" id="card_${item._fbKey}">
           <div class="card-header">
             <h2>${escapeHtml(item.term)}</h2>
             <div class="card-header-actions">
@@ -1779,16 +2220,29 @@
             ${item.code ? `
               <div class="code-block">
                 <div class="code-header">
-                  <span>💻 Snippet / Architettura Pratica</span>
-                  <button class="btn-copy" onclick="copyCode(this, '${encodeURIComponent(item.code)}')">Copia Codice</button>
+                  <span>💻 Snippet / ${codeLang.toUpperCase()}</span>
+                  <div class="code-header-tools">
+                    ${codeLang === 'javascript' ? `<button class="btn-run-code" onclick="runCodeSnippet('${item._fbKey}', '${encodeURIComponent(item.code)}')">▶ Esegui Codice</button>` : ''}
+                    <button class="btn-copy" onclick="copyCode(this, '${encodeURIComponent(item.code)}')">Copia Codice</button>
+                  </div>
                 </div>
-                <pre><code>${escapeHtml(item.code)}</code></pre>
+                <pre><code class="language-${codeLang}">${escapeHtml(item.code)}</code></pre>
+                
+                <div class="code-runner-console" id="console_${item._fbKey}">
+                  <div class="console-header">
+                    <span>🖥️ Console Output (Sandbox)</span>
+                    <button class="console-clear-btn" onclick="clearCodeConsole('${item._fbKey}')">Chiudi [x]</button>
+                  </div>
+                  <div class="console-output-text" id="console_text_${item._fbKey}"></div>
+                </div>
               </div>
             ` : ''}
           ` : ''}
         </div>
       `;
     }).join('');
+
+    if (window.Prism) Prism.highlightAll();
   }
 
   async function fetchTermFromWeb(searchTerm) {
@@ -1811,10 +2265,10 @@ Rispondi RIGOROSAMENTE ed ESCLUSIVAMENTE con un JSON valido (senza blocchi markd
   "category": "Una tra: Frontend, Backend, Database, Cloud, DevOps, Architettura, Sicurezza, Algoritmi, Networking, Testing, AI & Dati",
   "summary": "Definizione sintetica ma rigorosa (2 frasi).",
   "detail": "Spiegazione tecnica approfondita dell'architettura e del funzionamento interno.",
-  "useCase": "Esempio concreto e pratico di utilizzo in un progetto di produzione aziendale reale (es. e-commerce, gestione flotte, microservizi bancari).",
+  "useCase": "Esempio concreto e pratico di utilizzo in un progetto di produzione aziendale reale.",
   "whenToUse": "Sintesi chiara del miglior scenario in cui adottare questo concetto/tecnologia.",
-  "whenToAvoid": "L'errore comune o il caso tipico in cui NON dovrebbe essere usato (anti-pattern o overkill).",
-  "code": "Snippet di codice, comando shell o diagramma ASCII reale e completo che esemplifica l'implementazione pratica."
+  "whenToAvoid": "L'errore comune o il caso tipico in cui NON dovrebbe essere usato.",
+  "code": "Snippet di codice eseguibile, comando shell o script reale che esemplifica l'implementazione."
 }`;
 
     try {
@@ -1828,7 +2282,11 @@ Rispondi RIGOROSAMENTE ed ESCLUSIVAMENTE con un JSON valido (senza blocchi markd
       if (data.error) throw new Error(data.error.message || JSON.stringify(data.error));
 
       let rawText = data.candidates[0].content.parts[0].text;
-      rawText = rawText.replace(/```json/gi, '').replace(/```/g, '').trim();
+      const startIdx = rawText.indexOf('{');
+      const endIdx = rawText.lastIndexOf('}');
+      if (startIdx !== -1 && endIdx !== -1) {
+        rawText = rawText.slice(startIdx, endIdx + 1);
+      }
 
       const newTerm = JSON.parse(rawText);
       newTerm.autoFetched = true;
@@ -1846,16 +2304,13 @@ Rispondi RIGOROSAMENTE ed ESCLUSIVAMENTE con un JSON valido (senza blocchi markd
       if (isQuota) {
         let remainingSeconds = 30;
         const matchSec = errMsg.match(/retry in ([0-9.]+)s/i);
-        if (matchSec && matchSec[1]) {
-          remainingSeconds = Math.ceil(parseFloat(matchSec[1]));
-        }
+        if (matchSec && matchSec[1]) remainingSeconds = Math.ceil(parseFloat(matchSec[1]));
 
         if (retryCountdownTimer) clearInterval(retryCountdownTimer);
 
         loader.innerHTML = `
           <div class="quota-box">
-            <strong>⏳ Limite temporaneo raggiunto (Piano Gratuito)</strong><br>
-            Google richiede una breve pausa tra le richieste.<br>
+            <strong>⏳ Limite temporaneo raggiunto</strong><br>
             Riprova tra: <span id="countdownSpan" style="font-weight: 700; color: #fff;">${remainingSeconds}</span> secondi.
           </div>
         `;
@@ -1864,11 +2319,10 @@ Rispondi RIGOROSAMENTE ed ESCLUSIVAMENTE con un JSON valido (senza blocchi markd
           remainingSeconds--;
           const span = document.getElementById('countdownSpan');
           if (span) span.textContent = remainingSeconds;
-
           if (remainingSeconds <= 0) {
             clearInterval(retryCountdownTimer);
             if (btnGen) btnGen.disabled = false;
-            loader.innerHTML = `<p style="color: #4ade80; margin-top: 1rem; font-size: 0.9rem;">✅ Ora puoi riprovare a generare la scheda!</p>`;
+            loader.innerHTML = `<p style="color: #4ade80; margin-top: 1rem; font-size: 0.9rem;">✅ Ora puoi riprovare!</p>`;
           }
         }, 1000);
 
